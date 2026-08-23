@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-bright: var(--accent-bright);
+  --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
+  --color-on-danger: var(--on-danger);
+  --color-outline: var(--outline);
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-fg: var(--fg);
+  --color-sfg: var(--sfg);
+}
+
+/*
+ * 黄金比例间距刻度（借鉴 LiftKit 算法，φ = 1.6180339…）
+ * 以 md = 1rem 为基准，向上每档 ×φ，向下每档 ÷φ。
+ * 斐波那契性质：相邻两档相加恰等于下一档 ——
+ *   xs + sm = md · sm + md = lg · md + lg = xl · lg + xl = 2xl · xl + 2xl = 3xl
+ * 生成 p-phi-md / mt-phi-lg / gap-phi-xl / px-phi-3xl 等语义间距工具类。
+ *
+ * 命名必须带 phi- 前缀：Tailwind v4 中 --spacing-* 命名空间会劫持
+ * max-w/min-w/w 的同名刻度（max-w-3xl 曾被解析为 var(--spacing-3xl)），
+ * 前缀隔离后 max-w-3xl 恢复为 container 刻度 48rem。
+ */
+@theme {
+  --spacing-phi-xs: 0.382rem; /* md/φ² ≈  6.1px */
+  --spacing-phi-sm: 0.618rem; /* md/φ  ≈  9.9px */
+  --spacing-phi-md: 1rem; /* 基准    = 16px */
+  --spacing-phi-lg: 1.618rem; /* md×φ  ≈ 25.9px */
+  --spacing-phi-xl: 2.618rem; /* md×φ² ≈ 41.9px */
+  --spacing-phi-2xl: 4.236rem; /* md×φ³ ≈ 67.8px */
+  --spacing-phi-3xl: 6.854rem; /* md×φ⁴ ≈ 109.7px */
+}
+
+/*
+ * 颜色真源在 src/theme/（OKLCH 算法 + 画布停点），由 useTheme 在运行时
+ * 写入 <html>。这里只保留 FOUC 兜底值：亮色 + 默认 accent（#61b0f1）。
+ */
+:root {
+  --accent: #61b0f1;
+  --accent-dim: #3f7dbd;
+  --accent-bright: #8ec9f7;
+  --on-accent: #161616;
+  --danger: #e06c75;
+  --on-danger: #fafafa;
+  --outline: #c2c5cc;
+  --bg: #e7eaee;
+  --card: #e6e9ef;
+  --fg: #33353a;
+  --sfg: #7d7f86;
+}
+
+.dark {
+  --accent: #61b0f1;
+  --accent-dim: #3f7dbd;
+  --accent-bright: #8ec9f7;
+  --on-accent: #161616;
+  --danger: #e06c75;
+  --on-danger: #fafafa;
+  --outline: #3a3742;
+  --bg: #15181d;
+  --card: #1c2028;
+  --fg: #dcdde3;
+  --sfg: #8d8f97;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-enter {
+  animation: slide-in 0.4s ease both;
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.zoom-anim {
+  animation: zoom-in 0.35s ease both;
+}
+
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-anim {
+  animation: slide-left 0.35s ease both;
+}
+
+/*
+ * 细滚动条：accent 种子染色（OKLCH 推导层注入的变量），
+ * 悬停加深提示可拖。Firefox 走 scrollbar-width/scrollbar-color。
+ */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent;
+}
+
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  background-clip: padding-box;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}

@@ -1,0 +1,89 @@
+# oh-my-ppt — AI Deck Authoring Guide
+
+oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义。本文件是 AI 代理（Claude Code、Cursor、Aider 等）编辑这份文件的规范。
+
+## 核心契约
+
+- **改 PPT = 改 `src/config.ts`**，不改任何组件代码。
+- `src/types.ts` 是唯一 schema，所有页型字段以它的 TypeScript 类型为准。
+- 构建验证：`npm run build`（含 tsc 类型检查）。类型报错 = 内容写错，修 config 而不是修类型。
+
+## 顶层结构
+
+```ts
+{
+  title: string            // 文档标题与浏览器标签标题
+  author: string           // 封面署名
+  accent?: string          // 主题色 hex，如 '#61b0f1'
+  transition?: 'fade' | 'slide' | 'zoom' | 'none'   // 全局切换动效
+  theme: ThemeConfig       // 深浅色自动切换策略
+  narration: NarrationConfig  // TTS 旁白（lang 如 'zh-CN'，rate 0.5–2）
+  autoplay: AutoplayConfig    // 自动放映默认停留毫秒
+  slides: Slide[]          // 幻灯片数组，顺序即页序
+}
+```
+
+## 页型速查（slides 数组元素）
+
+| type | 必填字段 | 可选字段 |
+|---|---|---|
+| `cover` | `title` | `subtitle` |
+| `section` | `title` | `subtitle` |
+| `content` | `title` | `bullets: string[]`、`step: true`（逐条出现） |
+| `two-column` | `title, left, right` | 每列 `{ title?, bullets? }` |
+| `quote` | `quote` | `author` |
+| `code` | `title, code` | `language`（js/ts/py/bash）、`filename` |
+| `image` | `title, src` | `caption` |
+| `table` | `title, headers, rows` | — |
+| `chart` | `title, chart` | `chart: { kind, labels, series }`，kind 为 `bar/line/pie` |
+| `end` | `title` | `subtitle` |
+
+所有页型共有可选字段：
+
+- `notes` — 演讲者备注（Speaker 视图显示）
+- `narration` — TTS 旁白文本；缺省时由 title/bullets 自动拼接
+- `duration` — 自动放映停留毫秒（无旁白页生效）
+- `transition` — 覆盖全局切换动效
+
+## 写作守则
+
+1. **一页一个观点**：content 页 bullets 不超过 6 条，每条 ≤ 20 字。
+2. **章节节奏**：每 4–6 页插一个 `section` 过渡页。
+3. **数据页**：对比用 `two-column`，趋势用 `chart` (line)，占比用 `chart` (pie)，明细用 `table`。
+4. **旁白 ≠ 屏幕文字**：有 `narration` 时写完整的口播句子；没有就保持缺省自动拼接。
+5. **代码页**：`code` 字段用模板字符串，保持缩进；示例代码 ≤ 15 行。
+6. **中文文案**标点用全角，中英之间加空格。
+
+## 验证清单（AI 改完 config 后必做）
+
+```sh
+npm run build   # tsc + vite build，必须零错误
+npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
+```
+
+- 逐页检查：文字不溢出、图表数据非空、代码可读。
+- `npm run dev` 热更新即时预览；`dist/` 为纯静态可部署产物。
+
+## 单文件分发（dist-single）
+
+`npm run build:single` 产出自包含 `dist-single/oh-my-ppt.html`：JS/CSS 全部内联，文档数据在 `<script type="application/json" id="oh-my-ppt-doc">` 明文块中。
+
+**不可破坏的契约**（改 build-single.mjs 或渲染入口时遵守）：
+
+1. `#oh-my-ppt-doc` 块必须保持明文 JSON、同 id、可正则提取——这是 splice 契约，外部工具靠它原地换内容。
+2. 序列化时 `<` 必须转义为 `\u003c`，绝不允许字面 `</script>` 进入数据块。
+3. 运行时优先级：`sessionStorage 预览 > #oh-my-ppt-doc 块 > 内置 config.ts`。
+4. `window.ohMyPpt.loadDoc(json)` 校验并热预览（存 sessionStorage 后刷新）；`window.ohMyPpt.getDoc()` 返回当前文档 JSON。AI round-trip：getDoc 导出 → 修改 → loadDoc 预览 → 满意后把 JSON 写回数据块或 config.ts。
+5. 单文件模式下演讲者视图经 `?speaker` 查询参数打开（无独立 speaker.html）。
+
+## 示例：生成一份 5 页最小 deck
+
+```ts
+slides: [
+  { type: 'cover', title: '季度汇报', subtitle: '2026 Q2' },
+  { type: 'content', title: '重点成果', step: true, bullets: ['用户增长 40%', 'NRR 达到 110%'] },
+  { type: 'chart', title: '收入趋势', chart: { kind: 'line', labels: ['1月','2月','3月'], series: [{ name: '营收', data: [120, 150, 180] }] } },
+  { type: 'quote', quote: '少即是多。', author: '密斯·凡德罗' },
+  { type: 'end', title: 'Thanks' },
+]
+```

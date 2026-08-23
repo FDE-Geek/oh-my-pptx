@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-single/
+.tmp-single/
+.gstack/
+*.local
+.DS_Store
