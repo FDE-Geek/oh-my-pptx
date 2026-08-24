@@ -1,6 +1,7 @@
 # 计划：吸收 guizang-ppt-skill 的生成质量设计
 
 > 状态：v2 已落地（2026-08-25）
+> 落地核实：npm test 38/38、tsc 零错误；generate 走 lintDeck；SKILL Step 0.5/2.5 + AGENTS 四步循环；单文件壳 969KB。
 > 日期：2026-08-25（v2 同日）
 > 来源研究：`~/EA/guizang-ppt-skill`（歸藏 · op7418/guizang-ppt-skill）
 > 关联：VERSION.md v0.6 AI 生成工具链的增量强化，非新版本号
