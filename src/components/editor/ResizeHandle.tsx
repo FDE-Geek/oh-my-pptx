@@ -9,6 +9,7 @@ export function useResizablePanel(
   initial: number,
   min: number,
   max: number,
+  reverse = false,
 ) {
   const [width, setWidth] = useState(() => {
     try {
@@ -34,7 +35,7 @@ export function useResizablePanel(
     if (!dragging) return
     const onMove = (e: PointerEvent) => {
       const delta = e.clientX - startRef.current.pointer
-      const next = Math.max(min, Math.min(max, startRef.current.width + delta))
+      const next = Math.max(min, Math.min(max, startRef.current.width + (reverse ? -delta : delta)))
       setWidth(next)
     }
     const onUp = () => {
@@ -55,7 +56,7 @@ export function useResizablePanel(
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
     }
-  }, [dragging, min, max, storageKey, width])
+  }, [dragging, min, max, reverse, storageKey, width])
 
   return { width, dragging, onPointerDown }
 }

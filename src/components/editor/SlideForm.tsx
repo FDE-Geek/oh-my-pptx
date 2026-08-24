@@ -13,8 +13,10 @@ import type {
   SectionSlide,
   EndSlide,
 } from '../../types'
-import { Field, TextInput, TextArea, Select, Toggle, ListEditor } from './Controls'
+import type { SlidePatchOpts } from '../../hooks/useEditorDoc'
+import { Field, Section, TextInput, TextArea, Select, Toggle, ListEditor } from './Controls'
 import { DiagramCanvas } from './DiagramCanvas'
+import { SLIDE_TYPE_META } from './slideFactory'
 
 const TRANSITION_OPTIONS = [
   { value: 'fade', label: '淡入（默认）' },
@@ -26,41 +28,55 @@ const TRANSITION_OPTIONS = [
 export function SlideForm({
   slide,
   onChange,
+  onConvert,
 }: {
   slide: Slide
-  onChange: (patch: Partial<Slide>) => void
+  onChange: (patch: Partial<Slide>, opts?: SlidePatchOpts) => void
+  onConvert: (type: Slide['type']) => void
 }) {
+  const text = (patch: Partial<Slide>) => onChange(patch, { coalesce: true })
   return (
     <div className="flex flex-col gap-phi-md">
+      <Section>页面</Section>
       <Field label="页型">
-        <span className="rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-sm text-accent">
-          {slide.type}
-        </span>
+        <Select<Slide['type']>
+          value={slide.type}
+          options={SLIDE_TYPE_META.map(item => ({
+            value: item.type,
+            label: `${item.label} · ${item.type}`,
+          }))}
+          onChange={onConvert}
+        />
       </Field>
       <Field label="页眉面包屑（tag）">
         <TextInput
           value={slide.tag ?? ''}
           placeholder="§1 · 章节名（可选）"
-          onChange={v => onChange({ tag: v || undefined })}
+          onChange={v => text({ tag: v || undefined })}
         />
       </Field>
 
-      <SwitchByType slide={slide} onChange={onChange} />
+      <Section>内容</Section>
+      <SwitchByType slide={slide} onChange={onChange} text={text} />
 
-      <div className="my-phi-xs h-px bg-outline" />
+      <Section>讲稿</Section>
 
-      <TextArea
-        value={slide.notes ?? ''}
-        rows={2}
-        placeholder="演讲者备注（Speaker 视图显示）"
-        onChange={v => onChange({ notes: v || undefined })}
-      />
-      <TextArea
-        value={slide.narration ?? ''}
-        rows={2}
-        placeholder="TTS 旁白文本（缺省自动拼接）"
-        onChange={v => onChange({ narration: v || undefined })}
-      />
+      <Field label="讲者备注（notes：目的 + 转场）">
+        <TextArea
+          value={slide.notes ?? ''}
+          rows={2}
+          placeholder="目的：…转场：…"
+          onChange={v => text({ notes: v || undefined })}
+        />
+      </Field>
+      <Field label="口播稿（narration：完整句子）">
+        <TextArea
+          value={slide.narration ?? ''}
+          rows={2}
+          placeholder="写给 TTS 的完整口播句；缺省自动拼接"
+          onChange={v => text({ narration: v || undefined })}
+        />
+      </Field>
       <Field label="切换动效（覆盖全局）">
         <Select
           value={slide.transition ?? 'fade'}
@@ -75,21 +91,23 @@ export function SlideForm({
 function SwitchByType({
   slide,
   onChange,
+  text,
 }: {
   slide: Slide
-  onChange: (patch: Partial<Slide>) => void
+  onChange: (patch: Partial<Slide>, opts?: SlidePatchOpts) => void
+  text: (patch: Partial<Slide>) => void
 }) {
   switch (slide.type) {
     case 'cover':
       return (
         <>
           <Field label="标题">
-            <TextInput value={slide.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={slide.title} onChange={v => text({ title: v })} />
           </Field>
           <Field label="副标题">
             <TextInput
               value={slide.subtitle ?? ''}
-              onChange={v => onChange({ subtitle: v || undefined })}
+              onChange={v => text({ subtitle: v || undefined })}
             />
           </Field>
         </>
@@ -100,12 +118,12 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={section.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={section.title} onChange={v => text({ title: v })} />
           </Field>
           <Field label="副标题">
             <TextInput
               value={section.subtitle ?? ''}
-              onChange={v => onChange({ subtitle: v || undefined })}
+              onChange={v => text({ subtitle: v || undefined })}
             />
           </Field>
           <ListEditor
@@ -126,7 +144,7 @@ function SwitchByType({
                   value={items[i].title}
                   placeholder="条目标题"
                   onChange={v =>
-                    onChange({
+                    text({
                       items: items.map((item, j) => (j === i ? { ...item, title: v } : item)),
                     })
                   }
@@ -135,7 +153,7 @@ function SwitchByType({
                   value={items[i].summary ?? ''}
                   placeholder="摘要（可选）"
                   onChange={v =>
-                    onChange({
+                    text({
                       items: items.map((item, j) =>
                         j === i ? { ...item, summary: v || undefined } : item,
                       ),
@@ -153,17 +171,19 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={end.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={end.title} onChange={v => text({ title: v })} />
           </Field>
           <Field label="副标题">
             <TextInput
               value={end.subtitle ?? ''}
-              onChange={v => onChange({ subtitle: v || undefined })}
+              onChange={v => text({ subtitle: v || undefined })}
             />
           </Field>
           <BulletsEditor
             bullets={end.takeaways ?? []}
-            onChange={takeaways => onChange({ takeaways: takeaways.length ? takeaways : undefined })}
+            onChange={(takeaways, opts) =>
+              onChange({ takeaways: takeaways.length ? takeaways : undefined }, opts)
+            }
           />
         </>
       )
@@ -173,11 +193,11 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={content.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={content.title} onChange={v => text({ title: v })} />
           </Field>
           <BulletsEditor
             bullets={content.bullets ?? []}
-            onChange={bullets => onChange({ bullets })}
+            onChange={(bullets, opts) => onChange({ bullets }, opts)}
           />
           <Field label="版式">
             <Select<'left' | 'center' | 'card'>
@@ -205,17 +225,17 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={two.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={two.title} onChange={v => text({ title: v })} />
           </Field>
           <ColumnEditor
             label="左列"
             column={two.left}
-            onChange={left => onChange({ left })}
+            onChange={(left, opts) => onChange({ left }, opts)}
           />
           <ColumnEditor
             label="右列"
             column={two.right}
-            onChange={right => onChange({ right })}
+            onChange={(right, opts) => onChange({ right }, opts)}
           />
         </>
       )
@@ -228,13 +248,13 @@ function SwitchByType({
             <TextArea
               value={quote.quote}
               rows={4}
-              onChange={v => onChange({ quote: v })}
+              onChange={v => text({ quote: v })}
             />
           </Field>
           <Field label="署名">
             <TextInput
               value={quote.author ?? ''}
-              onChange={v => onChange({ author: v || undefined })}
+              onChange={v => text({ author: v || undefined })}
             />
           </Field>
         </>
@@ -245,26 +265,26 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={code.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={code.title} onChange={v => text({ title: v })} />
           </Field>
           <Field label="文件名（窗口标题）">
             <TextInput
               value={code.filename ?? ''}
-              onChange={v => onChange({ filename: v || undefined })}
+              onChange={v => text({ filename: v || undefined })}
             />
           </Field>
           <Field label="语言">
             <TextInput
               value={code.language ?? ''}
               placeholder="js / ts / py / bash"
-              onChange={v => onChange({ language: v || undefined })}
+              onChange={v => text({ language: v || undefined })}
             />
           </Field>
           <Field label="代码">
             <TextArea
               value={code.code}
               rows={10}
-              onChange={v => onChange({ code: v })}
+              onChange={v => text({ code: v })}
             />
           </Field>
         </>
@@ -275,15 +295,15 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={image.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={image.title} onChange={v => text({ title: v })} />
           </Field>
           <Field label="图片地址（src）">
-            <TextInput value={image.src} onChange={v => onChange({ src: v })} />
+            <TextInput value={image.src} onChange={v => text({ src: v })} />
           </Field>
           <Field label="说明文字">
             <TextInput
               value={image.caption ?? ''}
-              onChange={v => onChange({ caption: v || undefined })}
+              onChange={v => text({ caption: v || undefined })}
             />
           </Field>
         </>
@@ -294,17 +314,20 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={table.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={table.title} onChange={v => text({ title: v })} />
           </Field>
           <Field label="表头（逗号分隔）">
             <TextInput
               value={table.headers.join(', ')}
               onChange={v =>
-                onChange({ headers: v.split(/[,，]/).map(s => s.trim()).filter(Boolean) })
+                text({ headers: v.split(/[,，]/).map(s => s.trim()).filter(Boolean) })
               }
             />
           </Field>
-          <TableRowsEditor rows={table.rows} onChange={rows => onChange({ rows })} />
+          <TableRowsEditor
+            rows={table.rows}
+            onChange={(rows, opts) => onChange({ rows }, opts)}
+          />
         </>
       )
     }
@@ -313,9 +336,12 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={chart.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={chart.title} onChange={v => text({ title: v })} />
           </Field>
-          <ChartEditor chart={chart.chart} onChange={next => onChange({ chart: next })} />
+          <ChartEditor
+            chart={chart.chart}
+            onChange={(next, opts) => onChange({ chart: next }, opts)}
+          />
         </>
       )
     }
@@ -324,11 +350,12 @@ function SwitchByType({
       return (
         <>
           <Field label="标题">
-            <TextInput value={diagram.title} onChange={v => onChange({ title: v })} />
+            <TextInput value={diagram.title} onChange={v => text({ title: v })} />
           </Field>
+          {/* 入口卡片；Graph 宿主只在专注工作台（portal，不在本表单 DOM） */}
           <DiagramCanvas
             spec={diagram.diagram}
-            onChange={next => onChange({ diagram: next })}
+            onChange={next => onChange({ diagram: next }, { coalesce: true })}
           />
         </>
       )
@@ -341,7 +368,7 @@ function BulletsEditor({
   onChange,
 }: {
   bullets: string[]
-  onChange: (bullets: string[]) => void
+  onChange: (bullets: string[], opts?: SlidePatchOpts) => void
 }) {
   return (
     <ListEditor
@@ -360,7 +387,7 @@ function BulletsEditor({
         <TextInput
           value={bullets[i]}
           placeholder={`要点 ${i + 1}`}
-          onChange={v => onChange(bullets.map((b, j) => (j === i ? v : b)))}
+          onChange={v => onChange(bullets.map((b, j) => (j === i ? v : b)), { coalesce: true })}
         />
       )}
     </ListEditor>
@@ -374,7 +401,7 @@ function ColumnEditor({
 }: {
   label: string
   column: ColumnContent
-  onChange: (column: ColumnContent) => void
+  onChange: (column: ColumnContent, opts?: SlidePatchOpts) => void
 }) {
   return (
     <div className="rounded-lg border border-[var(--chrome-outline)] p-phi-sm bg-[var(--chrome-card)]">
@@ -383,12 +410,12 @@ function ColumnEditor({
         <Field label="列标题">
           <TextInput
             value={column.title ?? ''}
-            onChange={v => onChange({ ...column, title: v || undefined })}
+            onChange={v => onChange({ ...column, title: v || undefined }, { coalesce: true })}
           />
         </Field>
         <BulletsEditor
           bullets={column.bullets ?? []}
-          onChange={bullets => onChange({ ...column, bullets })}
+          onChange={(bullets, opts) => onChange({ ...column, bullets }, opts)}
         />
       </div>
     </div>
@@ -400,7 +427,7 @@ function TableRowsEditor({
   onChange,
 }: {
   rows: string[][]
-  onChange: (rows: string[][]) => void
+  onChange: (rows: string[][], opts?: SlidePatchOpts) => void
 }) {
   return (
     <ListEditor
@@ -424,6 +451,7 @@ function TableRowsEditor({
               rows.map((row, j) =>
                 j === i ? v.split(/[,，]/).map(s => s.trim()) : row,
               ),
+              { coalesce: true },
             )
           }
         />
@@ -437,7 +465,7 @@ function ChartEditor({
   onChange,
 }: {
   chart: ChartSpec
-  onChange: (chart: ChartSpec) => void
+  onChange: (chart: ChartSpec, opts?: SlidePatchOpts) => void
 }) {
   return (
     <div className="flex flex-col gap-phi-sm rounded-lg border border-[var(--chrome-outline)] p-phi-sm bg-[var(--chrome-card)]">
@@ -456,7 +484,10 @@ function ChartEditor({
         <TextInput
           value={chart.labels.join(', ')}
           onChange={v =>
-            onChange({ ...chart, labels: v.split(/[,，]/).map(s => s.trim()).filter(Boolean) })
+            onChange(
+              { ...chart, labels: v.split(/[,，]/).map(s => s.trim()).filter(Boolean) },
+              { coalesce: true },
+            )
           }
         />
       </Field>
@@ -480,24 +511,30 @@ function ChartEditor({
               value={chart.series[i].name}
               placeholder="系列名"
               onChange={v =>
-                onChange({
-                  ...chart,
-                  series: chart.series.map((s, j) => (j === i ? { ...s, name: v } : s)),
-                })
+                onChange(
+                  {
+                    ...chart,
+                    series: chart.series.map((s, j) => (j === i ? { ...s, name: v } : s)),
+                  },
+                  { coalesce: true },
+                )
               }
             />
             <TextInput
               value={chart.series[i].data.join(', ')}
               placeholder="数据（逗号分隔数字）"
               onChange={v =>
-                onChange({
-                  ...chart,
-                  series: chart.series.map((s, j) =>
-                    j === i
-                      ? { ...s, data: v.split(/[,，]/).map(x => Number(x.trim()) || 0) }
-                      : s,
-                  ),
-                })
+                onChange(
+                  {
+                    ...chart,
+                    series: chart.series.map((s, j) =>
+                      j === i
+                        ? { ...s, data: v.split(/[,，]/).map(x => Number(x.trim()) || 0) }
+                        : s,
+                    ),
+                  },
+                  { coalesce: true },
+                )
               }
             />
           </div>

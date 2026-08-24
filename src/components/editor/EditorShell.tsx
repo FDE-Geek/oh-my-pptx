@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeft,
+  ChevronDown,
   FileJson,
   FileCode2,
   Film,
@@ -11,61 +11,23 @@ import {
   Settings2,
   Undo2,
 } from 'lucide-react'
-import type { Slide, PPTConfig } from '../../types'
+import './editor.css'
+import type { PPTConfig } from '../../types'
 import { useEditorDoc } from '../../hooks/useEditorDoc'
 import { useTheme } from '../../hooks/useTheme'
 import { ThumbRail } from './ThumbRail'
 import { SlideForm } from './SlideForm'
 import { ResizeHandle, useResizablePanel } from './ResizeHandle'
-import { SlideRenderer } from '../SlideRenderer'
+import { FitPreview } from './FitPreview'
+import { convertSlide, NEW_SLIDE, SLIDE_TYPE_META } from './slideFactory'
 import { ACCENTS } from '../ThemePanel'
 import { BUILTIN_THEMES } from '../../theme/presets'
 import { DeckContext } from '../DeckContext'
 import { downloadConfigTs, downloadJson, parseImportedFile } from '../../utils/export'
 import { toHyperframesComposition } from '../../utils/hyperframes'
 import { exportStandaloneHtml } from '../../utils/exportHtml'
-import { Field, TextInput, Select, Toggle, NumberInput } from './Controls'
-
-const NEW_SLIDE: Record<string, () => Slide> = {
-  cover: () => ({ type: 'cover', title: '新封面' }),
-  section: () => ({ type: 'section', title: '新章节' }),
-  content: () => ({ type: 'content', title: '新页面', bullets: ['要点一', '要点二'] }),
-  'two-column': () => ({
-    type: 'two-column',
-    title: '对比页',
-    left: { title: '左', bullets: [] },
-    right: { title: '右', bullets: [] },
-  }),
-  quote: () => ({ type: 'quote', quote: '新引用', author: '' }),
-  code: () => ({ type: 'code', title: '代码页', code: 'console.log("hello")', language: 'js' }),
-  image: () => ({ type: 'image', title: '图片页', src: '' }),
-  table: () => ({ type: 'table', title: '表格页', headers: ['列一', '列二'], rows: [['', '']] }),
-  chart: () => ({
-    type: 'chart',
-    title: '图表页',
-    chart: {
-      kind: 'bar',
-      labels: ['一', '二', '三'],
-      series: [{ name: '系列一', data: [1, 2, 3] }],
-    },
-  }),
-  diagram: () => ({
-    type: 'diagram',
-    title: '图示页',
-    diagram: {
-      nodes: [
-        { id: 'a', x: 80, y: 60, label: '开始' },
-        { id: 'b', x: 280, y: 60, label: '处理' },
-        { id: 'c', x: 480, y: 60, label: '结束' },
-      ],
-      edges: [
-        { source: 'a', target: 'b' },
-        { source: 'b', target: 'c' },
-      ],
-    },
-  }),
-  end: () => ({ type: 'end', title: 'Thanks' }),
-}
+import { lintDeck } from '../../utils/lint'
+import { Field, Section, TextInput, Select, Toggle, NumberInput } from './Controls'
 
 export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
   const editor = useEditorDoc()
@@ -73,9 +35,17 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
   const { dark, toggle, accent, pickAccent } = useTheme(doc)
   const [metaOpen, setMetaOpen] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
-  const rail = useResizablePanel('oh-my-ppt:rail-w', 208, 150, 420)
-  const form = useResizablePanel('oh-my-ppt:form-w', 400, 300, 640)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [lintOpen, setLintOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [railHidden, setRailHidden] = useState(false)
+  const [formHidden, setFormHidden] = useState(false)
+  const rail = useResizablePanel('oh-my-ppt:rail-w', 188, 150, 360)
+  const form = useResizablePanel('oh-my-ppt:form-w', 320, 260, 520, true)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const issues = useMemo(() => lintDeck(doc), [doc])
+  const errorCount = issues.filter(i => i.level === 'error').length
+  const warnCount = issues.length - errorCount
 
   const importFile = useCallback(() => {
     fileInputRef.current?.click()
@@ -99,6 +69,21 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
 
   const current = doc.slides[selected]
 
+  const exportHtml = useCallback(() => {
+    exportStandaloneHtml(doc).catch(e => alert(e.message))
+  }, [doc])
+
+  const exportMp4 = useCallback(() => {
+    const html = toHyperframesComposition(doc, { singleFileName: 'oh-my-ppt.html' })
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'composition.html'
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [doc])
+
   const exit = useCallback(() => {
     if (
       !dirty ||
@@ -108,215 +93,255 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
     }
   }, [dirty, editor.doc, onExit])
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      const typing =
+        target?.tagName === 'INPUT'
+        || target?.tagName === 'TEXTAREA'
+        || target?.tagName === 'SELECT'
+        || target?.isContentEditable
+      const mod = e.metaKey || e.ctrlKey
+      if (mod && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault()
+        if (e.shiftKey) editor.redo()
+        else editor.undo()
+        return
+      }
+      if (mod && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault()
+        editor.redo()
+        return
+      }
+      if (mod && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault()
+        exportHtml()
+        return
+      }
+      if (e.key === 'Escape') {
+        if (addOpen) { setAddOpen(false); return }
+        if (exportOpen) { setExportOpen(false); return }
+        if (helpOpen) { setHelpOpen(false); return }
+        exit()
+        return
+      }
+      if (typing) return
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault()
+        setHelpOpen(o => !o)
+        return
+      }
+      if (e.key === '[') {
+        e.preventDefault()
+        setRailHidden(o => !o)
+        return
+      }
+      if (e.key === ']') {
+        e.preventDefault()
+        setFormHidden(o => !o)
+        return
+      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault()
+        editor.select(selected + 1)
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault()
+        editor.select(selected - 1)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [addOpen, editor, exit, exportHtml, exportOpen, helpOpen, selected])
+
   return (
     <DeckContext.Provider value={doc}>
-      <div className="flex h-full w-full flex-col bg-[var(--chrome-bg)] text-[var(--chrome-fg)]">
-      {/* 顶栏 */}
-      <header className="flex items-center gap-phi-md border-b border-[var(--chrome-outline)] bg-[var(--chrome-card)] px-phi-md py-phi-sm">
-        <button
-          onClick={exit}
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
-        >
-          <ArrowLeft size={15} />
-          放映
-        </button>
-        <span className="text-sm font-semibold">{doc.title}</span>
-        {dirty && (
-          <span
-            className="text-xs text-sfg"
-            title={`草稿已自动保存（localStorage，刷新不丢）\n「导出 config.ts」并替换 src/config.ts 后才算落盘`}
-          >
-            {editor.savedAt ? '✓ 草稿已保存' : '保存中…'}
+      <div className="ed-root">
+        <header className="ed-topbar">
+          <span className="ed-logo" title="oh-my-ppt">
+            <svg width="18" height="18" viewBox="0 0 32 32" aria-hidden>
+              <rect width="32" height="32" rx="7" fill="currentColor" opacity="0.12" />
+              <rect x="5" y="5" width="7" height="22" rx="2" fill="var(--accent)" />
+              <rect x="14" y="5" width="13" height="10" rx="2" fill="var(--accent-dim)" />
+              <rect x="14" y="17" width="13" height="10" rx="2" fill="var(--accent-bright)" />
+            </svg>
+            oh-my-ppt
           </span>
-        )}
-        {dirty && (
-          <button
-            onClick={() => {
-              if (confirm('放弃草稿，恢复到 config.ts / 数据块的原始内容？')) {
-                editor.discardDraft()
-              }
-            }}
-            title="放弃草稿"
-            className="rounded-md p-phi-xs text-sfg hover:text-danger"
-          >
-            <RotateCcw size={14} />
-          </button>
-        )}
-        <div className="flex-1" />
-        <button
-          onClick={editor.undo}
-          disabled={!editor.canUndo}
-          title="撤销 (Ctrl+Z)"
-          className="rounded-md p-phi-xs text-sfg hover:text-[var(--chrome-accent)] disabled:opacity-30"
-        >
-          <Undo2 size={16} />
-        </button>
-        <button
-          onClick={editor.redo}
-          disabled={!editor.canRedo}
-          title="重做 (Ctrl+Shift+Z)"
-          className="rounded-md p-phi-xs text-sfg hover:text-[var(--chrome-accent)] disabled:opacity-30"
-        >
-          <Redo2 size={16} />
-        </button>
-        <button
-          onClick={() => setMetaOpen(o => !o)}
-          title="deck 设置（标题/署名/主题/配音）"
-          className={`flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm transition-colors ${
-            metaOpen ? 'bg-accent-dim/15 text-accent' : 'text-sfg hover:text-[var(--chrome-accent)]'
-          }`}
-        >
-          <Settings2 size={15} />
-          Deck 设置
-        </button>
-        <button
-          onClick={importFile}
-          title="导入 config.ts / JSON（覆盖当前编辑内容，草稿将更新）"
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
-        >
-          <FolderOpen size={14} />
-          导入
-        </button>
-        <button
-          onClick={() => downloadJson(doc)}
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
-        >
-          <FileJson size={14} />
-          JSON
-        </button>
-        <button
-          onClick={() => {
-            const html = toHyperframesComposition(doc, { singleFileName: 'oh-my-ppt.html' })
-            const blob = new Blob([html], { type: 'text/html' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'composition.html'
-            a.click()
-            URL.revokeObjectURL(url)
-          }}
-          title="导出 HyperFrames composition（deck→MP4 的确定性渲染管线，需 npx hyperframes render）"
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
-        >
-          <Film size={14} />
-          MP4
-        </button>
-        <button
-          onClick={() => {
-            exportStandaloneHtml(doc).catch(e => alert(e.message))
-          }}
-          title="导出独立 HTML：当前编辑内容写入自包含文件，双击即可放映/分发"
-          className="flex items-center gap-phi-xs rounded-md bg-accent px-phi-md py-phi-xs text-sm font-medium text-on-accent hover:opacity-90"
-        >
-          <Globe size={14} />
-          导出 HTML
-        </button>
-        <button
-          onClick={() => downloadConfigTs(doc)}
-          className="flex items-center gap-phi-xs rounded-md bg-accent px-phi-md py-phi-xs text-sm font-medium text-on-accent hover:opacity-90"
-        >
-          <FileCode2 size={14} />
-          导出 config.ts
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".ts,.json,.txt"
-          className="hidden"
-          onChange={onFilePicked}
-        />
-      </header>
-
-      <div className="flex min-h-0 flex-1">
-        {/* 缩略图侧栏（可拖宽） */}
-        <ThumbRail
-          width={rail.width}
-          slides={doc.slides}
-          selected={selected}
-          onSelect={editor.select}
-          onAdd={() => setAddOpen(true)}
-          onDuplicate={editor.duplicateSlide}
-          onRemove={editor.removeSlide}
-          onMove={editor.moveSlide}
-        />
-        <ResizeHandle dragging={rail.dragging} onPointerDown={rail.onPointerDown} />
-
-        {/* 表单区（可拖宽，剩余空间给预览） */}
-        <main
-          className="thin-scroll shrink-0 overflow-y-auto p-phi-lg"
-          style={{ width: form.width }}
-        >
-          <div className="mb-phi-md flex items-center gap-phi-sm border-b border-outline pb-phi-sm">
+          <input
+            className="ed-title"
+            value={doc.title}
+            spellCheck={false}
+            title="文档标题（也用于浏览器标签）"
+            onChange={e => editor.updateMeta({ title: e.target.value }, { coalesce: true })}
+          />
+          {dirty && (
             <button
-              onClick={() => setMetaOpen(false)}
-              className={`rounded-md px-phi-sm py-phi-xs text-xs font-medium transition-colors ${
-                !metaOpen ? 'bg-accent-dim/15 text-accent' : 'text-sfg hover:text-[var(--chrome-accent)]'
-              }`}
+              type="button"
+              className="ed-btn"
+              title="放弃草稿，恢复源文件"
+              onClick={() => {
+                if (confirm('放弃草稿，恢复到 config.ts / 数据块的原始内容？')) editor.discardDraft()
+              }}
             >
-              页面设置 · 第 {selected + 1} 页（{current.type}）
+              <RotateCcw size={14} />
             </button>
-            <button
-              onClick={() => setMetaOpen(true)}
-              className={`rounded-md px-phi-sm py-phi-xs text-xs font-medium transition-colors ${
-                metaOpen ? 'bg-accent-dim/15 text-accent' : 'text-sfg hover:text-[var(--chrome-accent)]'
-              }`}
-            >
-              Deck 设置
+          )}
+          <div className="ed-group">
+            <button type="button" className="ed-btn" disabled={!editor.canUndo} title="撤销 (⌘Z)" onClick={editor.undo}>
+              <Undo2 size={15} />
+            </button>
+            <button type="button" className="ed-btn" disabled={!editor.canRedo} title="重做 (⇧⌘Z)" onClick={editor.redo}>
+              <Redo2 size={15} />
             </button>
           </div>
-          {metaOpen ? (
-            <DeckMetaForm doc={doc} dark={dark} accent={accent} onToggle={toggle} onPickAccent={pickAccent} onChange={editor.updateMeta} />
-          ) : (
-            <div className="mx-auto flex max-w-xl flex-col gap-phi-md">
+          <div className="ed-group ed-group-right">
+            {issues.length > 0 && (
+              <button
+                type="button"
+                className={`ed-btn${lintOpen ? ' on' : ''}`}
+                onClick={() => setLintOpen(o => !o)}
+              >
+                {errorCount > 0 ? `${errorCount} 错误` : `${warnCount} 警告`}
+              </button>
+            )}
+            <button
+              type="button"
+              className={`ed-btn${metaOpen ? ' on' : ''}`}
+              title="Deck 设置"
+              onClick={() => setMetaOpen(o => !o)}
+            >
+              <Settings2 size={15} />
+              <span className="ed-btn-label">Deck</span>
+            </button>
+            <button type="button" className="ed-btn" title="导入 config.ts / JSON" onClick={importFile}>
+              <FolderOpen size={14} />
+              <span className="ed-btn-label">导入</span>
+            </button>
+            <div className="ed-dropdown">
+              <div className="ed-split">
+                <button type="button" className="ed-btn ed-btn-primary" title="导出独立 HTML（⌘S）" onClick={exportHtml}>
+                  <Globe size={14} />
+                  <span className="ed-btn-label">导出</span>
+                  <span className={`ed-dirty${dirty ? ' on' : ''}`} />
+                </button>
+                <button type="button" className="ed-btn ed-caret" title="更多导出" onClick={() => setExportOpen(o => !o)}>
+                  <ChevronDown size={14} />
+                </button>
+              </div>
+              {exportOpen && (
+                <div className="ed-menu">
+                  <button type="button" className="ed-btn" onClick={() => { downloadConfigTs(doc); setExportOpen(false) }}>
+                    <FileCode2 size={14} /> config.ts
+                  </button>
+                  <button type="button" className="ed-btn" onClick={() => { downloadJson(doc); setExportOpen(false) }}>
+                    <FileJson size={14} /> JSON
+                  </button>
+                  <button type="button" className="ed-btn" onClick={() => { exportMp4(); setExportOpen(false) }}>
+                    <Film size={14} /> MP4 composition
+                  </button>
+                </div>
+              )}
+            </div>
+            <button type="button" className="ed-btn" title="快捷键（?）" onClick={() => setHelpOpen(true)}>
+              <b style={{ fontSize: 15, lineHeight: 1 }}>?</b>
+            </button>
+          </div>
+          <input ref={fileInputRef} type="file" accept=".ts,.json,.txt" className="hidden" onChange={onFilePicked} />
+        </header>
+
+        <div className="ed-main">
+          <ThumbRail
+            width={rail.width}
+            collapsed={railHidden}
+            slides={doc.slides}
+            selected={selected}
+            onSelect={editor.select}
+            onAdd={() => {
+              editor.select(doc.slides.length - 1)
+              setAddOpen(true)
+            }}
+            onInsertAfter={index => {
+              editor.select(index)
+              setAddOpen(true)
+            }}
+            onDuplicate={editor.duplicateSlide}
+            onRemove={editor.removeSlide}
+            onMove={editor.moveSlide}
+          />
+          {!railHidden && <ResizeHandle dragging={rail.dragging} onPointerDown={rail.onPointerDown} />}
+
+          <FitPreview slide={current} onPresent={exit} />
+
+          {!formHidden && <ResizeHandle dragging={form.dragging} onPointerDown={form.onPointerDown} />}
+          <aside className={`ed-props thin-scroll${formHidden ? ' ed-collapsed' : ''}`} style={{ width: formHidden ? 0 : form.width }}>
+            <div className="ed-tabs">
+              <button type="button" className={`ed-btn${!metaOpen ? ' on' : ''}`} onClick={() => setMetaOpen(false)}>
+                第 {selected + 1} 页
+              </button>
+              <button type="button" className={`ed-btn${metaOpen ? ' on' : ''}`} onClick={() => setMetaOpen(true)}>
+                Deck
+              </button>
+            </div>
+            {metaOpen ? (
+              <DeckMetaForm doc={doc} dark={dark} accent={accent} onToggle={toggle} onPickAccent={pickAccent} onChange={editor.updateMeta} />
+            ) : (
               <SlideForm
                 slide={current}
-                onChange={patch => editor.updateSlide(selected, patch)}
+                onChange={(patch, opts) => editor.updateSlide(selected, patch, opts)}
+                onConvert={type => editor.replaceSlide(selected, convertSlide(current, type))}
               />
-            </div>
-          )}
-        </main>
-        <ResizeHandle dragging={form.dragging} onPointerDown={form.onPointerDown} />
-
-        {/* 右侧实时预览 */}
-        <section className="flex min-w-0 flex-1 items-center justify-center overflow-hidden bg-[var(--chrome-bg)] p-phi-md">
-          <div className="pointer-events-none flex max-h-full w-full max-w-[640px] items-center justify-center overflow-hidden rounded-lg border border-outline bg-card">
-            <div className="pointer-events-none origin-center scale-[0.35]">
-              <div className="flex h-[540px] w-[960px] items-center px-phi-3xl">
-                <SlideRenderer slide={current} transition="none" />
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* 新增页面弹层 */}
-      {addOpen && (
-        <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/40"
-          onClick={() => setAddOpen(false)}
-        >
-          <div
-            className="grid w-[480px] grid-cols-2 gap-phi-sm rounded-xl bg-[var(--chrome-card)] p-phi-md shadow-2xl"
-            onClick={e => e.stopPropagation()}
-          >
-            <p className="col-span-2 px-phi-xs pb-phi-xs text-xs font-semibold tracking-widest text-sfg uppercase">
-              新增页面
-            </p>
-            {Object.entries(NEW_SLIDE).map(([type, factory]) => (
-              <button
-                key={type}
-                onClick={() => {
-                  editor.addSlide(factory())
-                  setAddOpen(false)
-                }}
-                className="rounded-lg border border-outline px-phi-md py-phi-sm text-left text-sm hover:border-accent hover:text-[var(--chrome-accent)]"
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+            )}
+            {lintOpen && issues.length > 0 && (
+              <ul className="mt-phi-md text-xs">
+                {issues.map((issue, i) => (
+                  <li key={`${issue.code}-${issue.page}-${i}`} className={issue.level === 'error' ? 'text-danger' : 'text-sfg'}>
+                    [{issue.code}] {issue.message}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </aside>
         </div>
-      )}
+
+        {addOpen && (
+          <div className="ed-help" onClick={() => setAddOpen(false)}>
+            <div className="ed-pick" onClick={e => e.stopPropagation()}>
+              <h3>在当前页后插入</h3>
+              {SLIDE_TYPE_META.map(({ type, label }) => (
+                <button
+                  key={type}
+                  type="button"
+                  className="ed-btn"
+                  style={{ border: '1px solid var(--ed-line)', justifyContent: 'flex-start' }}
+                  onClick={() => {
+                    editor.addSlide(NEW_SLIDE[type]())
+                    setAddOpen(false)
+                  }}
+                >
+                  <span>
+                    <b>{label}</b>
+                    <span className="ed-btn-label" style={{ display: 'block', fontSize: 11, color: 'var(--ed-muted)' }}>{type}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {helpOpen && (
+          <div className="ed-help" onClick={() => setHelpOpen(false)}>
+            <div className="ed-help-card" onClick={e => e.stopPropagation()}>
+              <h2>快捷键</h2>
+              <dl>
+                <dt>⌘Z / ⇧⌘Z</dt><dd>撤销 / 重做</dd>
+                <dt>⌘S</dt><dd>导出 HTML</dd>
+                <dt>↑ ↓</dt><dd>上一页 / 下一页</dd>
+                <dt>[ ]</dt><dd>缩略图栏 / 属性栏</dd>
+                <dt>?</dt><dd>本说明</dd>
+                <dt>Esc</dt><dd>关闭弹层，再按退出编辑</dd>
+              </dl>
+            </div>
+          </div>
+        )}
       </div>
     </DeckContext.Provider>
   )
@@ -338,13 +363,15 @@ function DeckMetaForm({
   onChange: (patch: Partial<PPTConfig>) => void
 }) {
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-phi-md">
+    <div className="flex flex-col gap-phi-md">
+      <Section>文档</Section>
       <Field label="标题（浏览器标签与顶栏）">
         <TextInput value={doc.title} onChange={(v: string) => onChange({ title: v })} />
       </Field>
       <Field label="署名（封面显示）">
         <TextInput value={doc.author} onChange={(v: string) => onChange({ author: v })} />
       </Field>
+      <Section>主题</Section>
       <Field label="主题预设（themes/）">
         <Select<string>
           value={doc.themePreset ?? 'default'}
@@ -395,6 +422,12 @@ function DeckMetaForm({
           onChange={(v: 'fade' | 'slide' | 'zoom' | 'none') => onChange({ transition: v })}
         />
       </Field>
+      <Section>旁白</Section>
+      <Toggle
+        checked={doc.narration.enabled}
+        onChange={v => onChange({ narration: { ...doc.narration, enabled: v } })}
+        label="启用旁白（narration.enabled）"
+      />
       <Field label="TTS 语言">
         <TextInput
           value={doc.narration.lang}

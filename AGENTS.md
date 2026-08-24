@@ -76,7 +76,7 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 - 节点：`id/label` 必填；`fill`（hex，同时作为描边色，字色 OKLCH 自动对比）、`shape`（`rect` 缺省 / `ellipse` / `diamond` 菱形判断 / `double-rect` 双框过程）可选
 - 边：`source/target` 引用节点 id；`label/dashed/arrow`（缺省 true）/ `router`（`orth` 正交缺省 / `normal` 直线）可选
 - 布局：`layout: 'dagre'` 时坐标自动计算（编辑器「自动布局 ↕/↔」按钮等价）
-- 编辑模式选中该页时表单区变为 X6 画布：拖节点、从边缘拉连线、点选改属性（文字/填充/形状）
+- 图只在专注模式 / 图工作台编辑（属性栏只有入口卡片，无 Graph 宿主）：拖节点、框选、对齐、缩放、从边缘拉连线、点选改节点/边属性
 
 ## 写作守则
 

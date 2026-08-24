@@ -4,6 +4,12 @@ import { getDeckConfig, getSourceConfig, saveDraft, clearDraft } from '../deck'
 
 const HISTORY_LIMIT = 50
 const AUTOSAVE_DELAY = 600
+const COALESCE_MS = 800
+
+export interface SlidePatchOpts {
+  /** 连续敲同一组字段时合并成一步撤销（输入框用）。 */
+  coalesce?: boolean
+}
 
 export interface EditorState {
   doc: PPTConfig
@@ -26,16 +32,36 @@ export function useEditorDoc() {
   }))
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const saveTimer = useRef<number | null>(null)
+  const lastCoalesce = useRef<{ key: string; at: number } | null>(null)
   // 源文档快照（不含草稿）：恢复自草稿时 dirty 应为 true，撤销回源则自动清草稿
   const pristineJson = useRef(JSON.stringify(getSourceConfig()))
 
-  const commit = useCallback((mutate: (draft: PPTConfig) => void, select?: number) => {
+  const commit = useCallback((
+    mutate: (draft: PPTConfig) => void,
+    opts?: { select?: number; coalesceKey?: string },
+  ) => {
     setState(current => {
       const draft = structuredClone(current.doc)
       mutate(draft)
+      const now = Date.now()
+      const key = opts?.coalesceKey
+      const merge = Boolean(
+        key
+        && lastCoalesce.current
+        && lastCoalesce.current.key === key
+        && now - lastCoalesce.current.at < COALESCE_MS,
+      )
+      lastCoalesce.current = key ? { key, at: now } : null
+      if (merge) {
+        return {
+          ...current,
+          doc: draft,
+          selected: opts?.select ?? current.selected,
+        }
+      }
       return {
         doc: draft,
-        selected: select ?? current.selected,
+        selected: opts?.select ?? current.selected,
         past: [...current.past.slice(-HISTORY_LIMIT + 1), current.doc],
         future: [],
       }
@@ -47,9 +73,21 @@ export function useEditorDoc() {
   }, [])
 
   const updateSlide = useCallback(
-    (index: number, patch: Partial<Slide>) => {
+    (index: number, patch: Partial<Slide>, opts?: SlidePatchOpts) => {
+      commit(
+        draft => {
+          draft.slides[index] = { ...draft.slides[index], ...patch } as Slide
+        },
+        opts?.coalesce ? { coalesceKey: `slide:${index}:${Object.keys(patch).sort().join(',')}` } : undefined,
+      )
+    },
+    [commit],
+  )
+
+  const replaceSlide = useCallback(
+    (index: number, slide: Slide) => {
       commit(draft => {
-        draft.slides[index] = { ...draft.slides[index], ...patch } as Slide
+        draft.slides[index] = slide
       })
     },
     [commit],
@@ -57,14 +95,20 @@ export function useEditorDoc() {
 
   const addSlide = useCallback(
     (slide: Slide) => {
-      commit(
-        draft => {
-          draft.slides.push(slide)
-        },
-        state.doc.slides.length,
-      )
+      setState(current => {
+        const draft = structuredClone(current.doc)
+        const at = Math.min(current.selected + 1, draft.slides.length)
+        draft.slides.splice(at, 0, slide)
+        lastCoalesce.current = null
+        return {
+          doc: draft,
+          selected: at,
+          past: [...current.past.slice(-HISTORY_LIMIT + 1), current.doc],
+          future: [],
+        }
+      })
     },
-    [commit, state.doc.slides.length],
+    [],
   )
 
   const duplicateSlide = useCallback(
@@ -73,7 +117,7 @@ export function useEditorDoc() {
         draft => {
           draft.slides.splice(index + 1, 0, structuredClone(draft.slides[index]))
         },
-        index + 1,
+        { select: index + 1 },
       )
     },
     [commit],
@@ -86,7 +130,7 @@ export function useEditorDoc() {
         draft => {
           draft.slides.splice(index, 1)
         },
-        Math.max(0, index - 1),
+        { select: Math.max(0, index - 1) },
       )
     },
     [commit, state.doc.slides.length],
@@ -100,22 +144,26 @@ export function useEditorDoc() {
           const [moved] = draft.slides.splice(from, 1)
           draft.slides.splice(to, 0, moved)
         },
-        to,
+        { select: to },
       )
     },
     [commit, state.doc.slides.length],
   )
 
   const updateMeta = useCallback(
-    (patch: Partial<PPTConfig>) => {
-      commit(draft => {
-        Object.assign(draft, patch)
-      })
+    (patch: Partial<PPTConfig>, opts?: SlidePatchOpts) => {
+      commit(
+        draft => {
+          Object.assign(draft, patch)
+        },
+        opts?.coalesce ? { coalesceKey: `meta:${Object.keys(patch).sort().join(',')}` } : undefined,
+      )
     },
     [commit],
   )
 
   const undo = useCallback(() => {
+    lastCoalesce.current = null
     setState(current => {
       if (current.past.length === 0) return current
       const previous = current.past[current.past.length - 1]
@@ -130,6 +178,7 @@ export function useEditorDoc() {
   }, [])
 
   const redo = useCallback(() => {
+    lastCoalesce.current = null
     setState(current => {
       if (current.future.length === 0) return current
       const next = current.future[0]
@@ -196,6 +245,7 @@ export function useEditorDoc() {
       savedAt,
       select,
       updateSlide,
+      replaceSlide,
       addSlide,
       duplicateSlide,
       removeSlide,
@@ -214,6 +264,7 @@ export function useEditorDoc() {
       savedAt,
       select,
       updateSlide,
+      replaceSlide,
       addSlide,
       duplicateSlide,
       removeSlide,

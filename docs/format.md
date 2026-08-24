@@ -81,6 +81,8 @@ chart 约束：`kind ∈ bar|line|pie`；每条 `series.data.length === labels.l
 }
 ```
 
+编辑：图只在专注模式 / 图工作台改 `diagram`；属性栏无画布。schema 字段不因此新增。
+
 ## 5. 单文件分发格式（splice 契约）
 
 1. 产物为单一 HTML：JS/CSS 全内联，无外部请求，file:// 可开。

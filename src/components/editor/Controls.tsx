@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Section({ children }: { children: ReactNode }) {
+  return <p className="ed-section">{children}</p>
+}
+
+export function Field({ label, children, tip }: { label: string; children: ReactNode; tip?: string }) {
   return (
-    <label className="flex flex-col gap-phi-xs">
+    <label className="flex flex-col gap-phi-xs" title={tip}>
       <span className="text-xs font-medium tracking-wide text-sfg">{label}</span>
       {children}
     </label>

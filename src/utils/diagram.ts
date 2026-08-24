@@ -1,7 +1,10 @@
-import { Graph } from '@antv/x6'
+import { Graph, Selection, Snapline, Transform, type Edge } from '@antv/x6'
 import dagre from 'dagre'
 import type { DiagramEdgeSpec, DiagramNodeSpec, DiagramSpec } from '../types'
 import { contrastOn } from '../theme/color-ramp'
+import { edgeAttrsToSpec, edgeLabelText, routerNameOf } from './diagram-spec'
+
+export { edgeAttrsToSpec, edgeLabelText, routerNameOf } from './diagram-spec'
 
 type DagreNode = { x: number; y: number; width: number; height: number }
 type DagreGraph = {
@@ -152,6 +155,13 @@ export function resolveSpec(spec: DiagramSpec): DiagramSpec {
   return spec
 }
 
+/** 编辑态：仅当坐标全是 0 时套 dagre，避免重挂时冲掉用户拖过的位置。 */
+export function specForEdit(spec: DiagramSpec): DiagramSpec {
+  const parked = spec.nodes.every(n => !n.x && !n.y)
+  if (spec.layout === 'dagre' && parked) return applyDagreLayout(spec, spec.layoutDir ?? 'TB')
+  return spec
+}
+
 function nodeShape(node: DiagramNodeSpec): string {
   switch (node.shape) {
     case 'ellipse':
@@ -234,11 +244,15 @@ export function mountGraph(
   readonly: boolean,
 ): Graph {
   ensureCustomShapes()
-  const spec = readonly ? resolveSpec(rawSpec) : rawSpec
+  const spec = readonly ? resolveSpec(rawSpec) : specForEdit(rawSpec)
 
   const graph: Graph = new Graph({
     container,
     interacting: readonly ? false : true,
+    panning: readonly ? false : { enabled: true, modifiers: 'shift' },
+    mousewheel: readonly
+      ? false
+      : { enabled: true, zoomAtMousePosition: true, modifiers: ['ctrl', 'meta'], minScale: 0.2, maxScale: 3 },
     grid: readonly
       ? false
       : { size: 16, visible: true, type: 'doubleMesh' },
@@ -249,15 +263,48 @@ export function mountGraph(
       allowBlank: false,
       allowLoop: false,
       createEdge() {
-        return graph.createEdge({ attrs: edgeAttrs({ arrow: true }) })
+        return graph.createEdge({
+          attrs: edgeAttrs({ arrow: true }),
+          router: { name: 'orth', args: { padding: 12 } },
+          connector: { name: 'rounded' },
+        })
       },
     },
   })
 
   addSpecNodes(graph, spec)
   addSpecEdges(graph, spec)
+  if (!readonly) attachWorkbenchPlugins(graph)
 
   return graph
+}
+
+/** 工作台专用：只读路径（放映/缩略图）不得调用。 */
+function attachWorkbenchPlugins(graph: Graph) {
+  graph
+    .use(
+      new Selection({
+        enabled: true,
+        multiple: true,
+        rubberband: true,
+        movable: true,
+        showNodeSelectionBox: true,
+        showEdgeSelectionBox: true,
+      }),
+    )
+    .use(new Snapline({ enabled: true, resizing: true }))
+    .use(
+      new Transform({
+        rotating: false,
+        resizing: {
+          enabled: true,
+          minWidth: 40,
+          minHeight: 24,
+          preserveAspectRatio: node =>
+            node.shape === 'omp-diamond' || node.shape === 'omp-double-rect',
+        },
+      }),
+    )
 }
 
 function nodeLabel(node: { label?: unknown }): string {
@@ -268,15 +315,6 @@ function nodeLabel(node: { label?: unknown }): string {
     if (typeof text === 'string') return text
   }
   return ''
-}
-
-function edgeLabelText(edge: { labels?: unknown }): string | undefined {
-  const labels = edge.labels
-  if (!Array.isArray(labels) || labels.length === 0) return undefined
-  const first = labels[0] as { attrs?: { label?: { text?: unknown } } } | { text?: unknown }
-  const text =
-    'attrs' in first ? first.attrs?.label?.text : (first as { text?: unknown }).text
-  return typeof text === 'string' ? text : undefined
 }
 
 function specShapeOf(json: { shape?: string }): DiagramNodeSpec['shape'] {
@@ -320,22 +358,60 @@ export function graphToSpec(graph: Graph, spec: DiagramSpec): DiagramSpec {
       }
     }),
     edges: graph.getEdges().map(edge => {
-      const json = edge.toJSON() as { labels?: unknown }
+      const json = edge.toJSON() as { labels?: unknown; attrs?: { line?: { strokeDasharray?: string; targetMarker?: unknown } } }
       const source = String(edge.getSourceCellId())
       const target = String(edge.getTargetCellId())
-      // 保留原 spec 的边属性（dashed/arrow/router）——画布交互不表达这些，
-      // 从旧 spec 按 source→target 合并，避免拖一下节点虚线变实线。
-      const prev = spec.edges.find(
-        e => e.source === source && e.target === target,
-      )
+      const attrs = (edge.getAttrs() ?? json.attrs ?? {}) as {
+        line?: { strokeDasharray?: string; targetMarker?: unknown }
+      }
+      const fields = edgeAttrsToSpec(attrs, routerNameOf(edge.getRouter()))
       return {
         source,
         target,
-        label: edgeLabelText(json) ?? prev?.label,
-        dashed: prev?.dashed,
-        arrow: prev?.arrow,
-        router: prev?.router,
+        label: edgeLabelText(json),
+        ...fields,
       }
     }),
   }
+}
+
+/** 检查器改边：同步画布 attrs，避免 epoch 重挂。 */
+export function applyEdgeVisual(
+  edge: Edge,
+  next: Pick<DiagramEdgeSpec, 'dashed' | 'arrow' | 'router' | 'label'>,
+) {
+  const attrs = edgeAttrs(next)
+  edge.attr('line/strokeDasharray', attrs.line.strokeDasharray ?? '')
+  edge.attr('line/targetMarker', attrs.line.targetMarker)
+  if (next.router === 'normal') edge.setRouter({ name: 'normal' })
+  else edge.setRouter({ name: 'orth', args: { padding: 12 } })
+  if (next.label !== undefined) {
+    if (next.label) edge.setLabels([next.label])
+    else edge.setLabels([])
+  }
+}
+
+/** 从现场 SVG 下载快照（不用 Export 插件）。CSS 变量打成实色。 */
+export function downloadRenderedSvg(host: HTMLElement, filename = 'diagram.svg'): boolean {
+  const svg = host.querySelector('svg')
+  if (!svg) return false
+  const clone = svg.cloneNode(true) as SVGSVGElement
+  if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  const cs = getComputedStyle(host.closest('.ed-diagram-focus') ?? host)
+  const replacements: [string, string][] = [
+    ['var(--accent)', cs.getPropertyValue('--accent').trim() || '#61b0f1'],
+    ['var(--card)', cs.getPropertyValue('--card').trim() || '#ffffff'],
+    ['var(--fg)', cs.getPropertyValue('--fg').trim() || '#111111'],
+  ]
+  let xml = new XMLSerializer().serializeToString(clone)
+  for (const [from, to] of replacements) xml = xml.split(from).join(to)
+  if (xml.includes('var(--')) return false
+  const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+  return true
 }
