@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:single": "vite build --config vite.config.single.ts && node scripts/build-single.mjs",
+    "generate": "node scripts/generate.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -94,6 +94,13 @@ npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
 - 逐页检查：文字不溢出、图表数据非空、代码可读。
 - `npm run dev` 热更新即时预览；`dist/` 为纯静态可部署产物。
 
+## AI 生成工具链（v0.6+）
+
+- **CLI**：`npm run generate -- "主题" --prompt tech-tutorial -o deck.json`——OpenAI 兼容端点（缺省 Ollama `qwen3:8b`），生成后自动质量闸
+- **prompt 库**：`prompts/index.ts`（full-deck / lightning-talk / data-review / tech-tutorial）
+- **质量闸**：`src/utils/lint.ts`——图表数据对齐、diagram 边引用、表格列数、bullets 超长、章节节奏等结构性检查；agent 生成 deck 后应心算过一遍同规则
+- **skill**：`skills/oh-my-ppt/SKILL.md`——Claude Code 安装后按工作流生成
+
 ## 单文件分发（dist-single）
 
 `npm run build:single` 产出自包含 `dist-single/oh-my-ppt.html`：JS/CSS 全部内联，文档数据在 `<script type="application/json" id="oh-my-ppt-doc">` 明文块中。

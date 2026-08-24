@@ -33,12 +33,12 @@
 - [x] **版式扩展**：content 页 `layout: 'center'/'card'` 版式变体
 - [x] **deck 模板预设**：内置 4 套（default/tech-share/product-launch/academic）——种子色+字体+密度（compact/normal/airy → φ 基准倍率）+动效，编辑器 Deck 设置下拉切换
 
-### v0.6 —— AI 深度集成（对标 agent-native 循环）
+### v0.6 —— AI 深度集成（对标 agent-native 循环）✅
 
-- [ ] **CLI 生成器**：`npx oh-my-ppt "主题"`——命令行直出 config.ts（本地模型/Ollama 友好）
-- [ ] **Claude Code skill 发布**：把 AGENTS.md 打包为可安装 skill（`/plugin` 市场分发）
-- [ ] **prompt 库**：`prompts/` 目录沉淀"开场页/数据页/对比页"级别的生成 prompt 模板（对应 OpenDesign 的 93 个 prompt-templates）
-- [ ] **内容质量闸**：生成后自动检查（bullets 超长/图表空数据/页数节奏），报告而非静默
+- [x] **CLI 生成器**：`npm run generate -- "主题"`（`scripts/generate.mjs`）——OpenAI 兼容端点（缺省 Ollama 本地，`OHMY_PPT_BASE_URL/KEY/MODEL` 可换任意端点），零 npm 依赖，markdown 围栏自动剥离
+- [x] **Claude Code skill**：`.claude-plugin/plugin.json` + `skills/oh-my-ppt/SKILL.md`——生成/质量闸/验证工作流打包，可 `/plugin marketplace add FDE-GROUP/oh-my-pptx` 安装
+- [x] **prompt 库**：`prompts/index.ts`——4 套模板（full-deck/lightning-talk/data-review/tech-tutorial）× schema 约束 × 写作守则 × 质量自检，CLI 与 skill 共用
+- [x] **内容质量闸**：`src/utils/lint.ts` 纯函数——页型结构/图表数据对齐/diagram 边引用/表格列数/bullets 超长/章节节奏，CLI 生成后强制跑（14 项规则实测命中）
 
 ### v0.7 —— 成片增强（对标 HyperFrames 思路）
 
