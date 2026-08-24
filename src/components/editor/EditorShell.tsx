@@ -5,6 +5,7 @@ import {
   FileCode2,
   Film,
   FolderOpen,
+  Globe,
   Redo2,
   RotateCcw,
   Settings2,
@@ -22,6 +23,7 @@ import { BUILTIN_THEMES } from '../../theme/presets'
 import { DeckContext } from '../DeckContext'
 import { downloadConfigTs, downloadJson, parseImportedFile } from '../../utils/export'
 import { toHyperframesComposition } from '../../utils/hyperframes'
+import { exportStandaloneHtml } from '../../utils/exportHtml'
 import { Field, TextInput, Select, Toggle, NumberInput } from './Controls'
 
 const NEW_SLIDE: Record<string, () => Slide> = {
@@ -198,6 +200,16 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
         >
           <Film size={14} />
           MP4
+        </button>
+        <button
+          onClick={() => {
+            exportStandaloneHtml(doc).catch(e => alert(e.message))
+          }}
+          title="导出独立 HTML：当前编辑内容写入自包含文件，双击即可放映/分发"
+          className="flex items-center gap-phi-xs rounded-md bg-accent px-phi-md py-phi-xs text-sm font-medium text-on-accent hover:opacity-90"
+        >
+          <Globe size={14} />
+          导出 HTML
         </button>
         <button
           onClick={() => downloadConfigTs(doc)}

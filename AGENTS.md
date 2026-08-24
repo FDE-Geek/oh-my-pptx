@@ -104,6 +104,7 @@ npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
 - **skill**：`skills/oh-my-ppt/SKILL.md`——Claude Code 安装后按工作流生成
 - **MP4 成片**：`node scripts/export-hyperframes.mjs` 或编辑器「MP4」按钮 → HyperFrames composition（每页 iframe clip + GSAP timelines）；与单文件 deck 同目录后 `npx hyperframes render` 出确定性 MP4
 - **TTS 预生成**：`npm run tts`（`src/tts/` Provider 抽象：system/edge 可扩展云端）——Edge neural 音色（`--voice zh-CN-XiaoxiaoNeural` 等 8 个内置）逐页生成 MP3 到 `assets/narration/`，并在 `narration-refs.txt` 输出各页 `narrationAudio` 引用片段；放映/录制自动优先用音频文件（AudioMixer 混入录制音轨）
+- **独立 HTML 导出**：编辑器「导出 HTML」按钮——当前编辑内容写入 `public/shell.html`（build:single 产物软链）的数据块，浏览器直接下载自包含文件，双击即可放映/分发；数据块替换契约与 build-single 一致（明文 JSON、`<` 转义）
 
 ## 单文件分发（dist-single）
 
