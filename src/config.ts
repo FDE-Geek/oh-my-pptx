@@ -53,6 +53,18 @@ export const CONFIG: PPTConfig = {
     },
     {
       type: 'section',
+      title: '目录',
+      items: [
+        { title: '进程启动链路', summary: '入口 · 配置 · 进程模型 · Registry 预热' },
+        { title: '启动时典型日志', summary: '日常 INFO 行对照' },
+        { title: '数据库何时算初始化', summary: '空库 · base_data.sql · load_modules' },
+        { title: '默认用户（不装演示也有）', summary: '三用户表 · 演示账号 · 表单覆盖' },
+        { title: '对本地与 OdooThink 的含义', summary: '手测 · 空壳库 · 登录约定' },
+      ],
+      narration: '今天五个部分：启动链路、日志对照、数据库初始化、默认用户、实战含义。',
+    },
+    {
+      type: 'section',
       title: '1 · 进程启动链路',
       subtitle: 'cli/server.py → service/server.py 主线',
       narration: '第一节，进程启动链路。入口是 odoo-bin 默认命令，主线落在 service/server。',
@@ -90,6 +102,7 @@ export const CONFIG: PPTConfig = {
     },
     {
       type: 'content',
+      tag: '§1.1 · 配置与安全',
       title: '配置与安全检查',
       step: true,
       bullets: [
@@ -132,6 +145,7 @@ export const CONFIG: PPTConfig = {
     },
     {
       type: 'content',
+      tag: '§1.4 · Registry 预热',
       title: 'Registry 预热四步',
       step: true,
       bullets: [
@@ -322,8 +336,13 @@ env.ref('base.user_admin').write(values)
     },
     {
       type: 'end',
-      title: 'Thanks',
-      subtitle: 'Odoo 19 CE · 启动链与初始化 · 源码基准 11f6e1f6',
+      title: '一句话记住',
+      subtitle: 'Odoo 19 CE · 源码基准 11f6e1f6',
+      takeaways: [
+        '启动是一条链路，不是装一遍全部模块',
+        '能接请求看两行日志：HTTP + Registry loaded',
+        '不装演示也有 3 个用户，能登录的只有 Administrator',
+      ],
       narration: '谢谢。',
     },
   ],

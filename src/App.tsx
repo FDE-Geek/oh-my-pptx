@@ -43,6 +43,20 @@ export default function App() {
   const forceStepRef = useRef(forceStep)
   forceStepRef.current = forceStep
   const frame = embedRef.current.frame
+
+  // 打印模式：beforeprint 时把全部页面渲染为 .slide-page 堆叠，
+  // 配合 @page 16:9 与 break-after 实现每页一张精确分页。
+  const [printing, setPrinting] = useState(false)
+  useEffect(() => {
+    const before = () => setPrinting(true)
+    const after = () => setPrinting(false)
+    window.addEventListener('beforeprint', before)
+    window.addEventListener('afterprint', after)
+    return () => {
+      window.removeEventListener('beforeprint', before)
+      window.removeEventListener('afterprint', after)
+    }
+  }, [])
   const recorderRef = useRef<ReturnType<typeof createRecorder> | null>(null)
   const recordingActiveRef = useRef(false)
 
@@ -260,6 +274,18 @@ export default function App() {
 
   if (editing) {
     return <EditorShell onExit={exitEditor} />
+  }
+
+  if (printing) {
+    return (
+      <div className="print-all">
+        {DECK.slides.map((slide, index) => (
+          <div className="slide-page" key={index}>
+            <SlideRenderer slide={slide} transition="none" />
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (

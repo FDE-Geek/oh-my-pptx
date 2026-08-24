@@ -167,6 +167,55 @@ h3 {
   .no-print {
     display: none !important;
   }
+
+  /* 精确分页：每页一张 16:9（1280×720 ≈ 338.7mm×190.5mm），无白边 */
+  html,
+  body,
+  #root {
+    background: #fff !important;
+    height: auto !important;
+  }
+
+  body > div,
+  body > div > div {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  main {
+    display: block !important;
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  /* 每页内容包一个 .slide-page（App 渲染时包一层）；固定 16:9 舞台 */
+  .slide-page {
+    width: 1280px;
+    height: 720px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 52px 64px !important;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    box-sizing: border-box;
+  }
+
+  .slide-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* 打印时展示全部页面：由 App 在 print 事件克隆生成 */
+  .print-all .slide-page {
+    display: flex !important;
+  }
+}
+
+@page {
+  size: 338.7mm 190.5mm;
+  margin: 0;
 }
 
 html,

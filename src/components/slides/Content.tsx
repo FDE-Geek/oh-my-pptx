@@ -1,4 +1,5 @@
 import type { ContentSlide } from '../../types'
+import { SlideTag } from './SlideTag'
 
 export function Content({
   slide,
@@ -16,7 +17,8 @@ export function Content({
   if (layout === 'center') {
     return (
       <div className="slide-enter flex w-full max-w-3xl flex-col items-center gap-phi-lg text-center">
-        <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
+        <SlideTag tag={slide.tag} />
+          <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
         <div className="h-1 w-14 rounded-full bg-accent" />
         <ul className="flex flex-col items-center gap-phi-md">
           {bullets.map((bullet, index) => (
@@ -37,7 +39,8 @@ export function Content({
   if (layout === 'card') {
     return (
       <div className="slide-enter flex w-full max-w-4xl flex-col items-start gap-phi-lg">
-        <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
+        <SlideTag tag={slide.tag} />
+          <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
         <div className="grid w-full grid-cols-2 gap-phi-md">
           {bullets.map((bullet, index) => (
             <div
@@ -57,7 +60,8 @@ export function Content({
 
   return (
     <div className="slide-enter flex w-full max-w-3xl flex-col items-start gap-phi-lg">
-      <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
+      <SlideTag tag={slide.tag} />
+          <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
       <div className="h-1 w-14 rounded-full bg-accent" />
       <ul className="flex flex-col gap-phi-md">
         {bullets.map((bullet, index) => (

@@ -3,6 +3,8 @@ export type Transition = 'fade' | 'slide' | 'zoom' | 'none'
 interface SlideBase {
   notes?: string
   transition?: Transition
+  /** 页眉面包屑（如 '§1 · 进程启动链路'），显示在标题上方。 */
+  tag?: string
   /** TTS 旁白文本；缺省时用 title+bullets 拼接 */
   narration?: string
   /** 旁白音频文件地址（设置后此页不用 TTS，音频走 AudioMixer 混入录制流）。 */
@@ -23,6 +25,8 @@ export interface SectionSlide extends SlideBase {
   type: 'section'
   title: string
   subtitle?: string
+  /** 目录条目（提供时渲染为 TOC 目录页：编号+标题+摘要）。 */
+  items?: { title: string; summary?: string }[]
 }
 
 export interface ContentSlide extends SlideBase {
@@ -38,6 +42,8 @@ export interface EndSlide extends SlideBase {
   type: 'end'
   title: string
   subtitle?: string
+  /** 结尾记忆点（如三句话带走），在标题下方逐条展示。 */
+  takeaways?: string[]
 }
 
 export interface ColumnContent {
