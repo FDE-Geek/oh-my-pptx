@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
-import { LayoutGrid, Plus, Trash2, Wand2 } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { LayoutGrid, Maximize2, Minimize2, Plus, Trash2, Wand2 } from 'lucide-react'
 import type { DiagramSpec } from '../../types'
 import { mountGraph, graphToSpec, applyDagreLayout } from '../../utils/diagram'
 
 /**
  * 编辑态 X6 画布：拖节点、连线、删除、选中编辑属性，
  * 每次交互后同步回 spec（进 useEditorDoc 撤销栈与草稿）。
+ * 「专注模式」把整个画布推入浏览器全屏（Fullscreen API），工具栏与属性面板同屏随行。
  */
 export function DiagramCanvas({
   spec,
@@ -14,8 +15,10 @@ export function DiagramCanvas({
   spec: DiagramSpec
   onChange: (next: DiagramSpec) => void
 }) {
+  const shellRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
   const specRef = useRef(spec)
   specRef.current = spec
   // spec 外部替换（自动布局/撤销/导入）时经 key 重挂画布；
@@ -23,11 +26,33 @@ export function DiagramCanvas({
   // 但回流 spec 与当前画布一致，重挂等价无害（仅多一次渲染）。
   const remountKey = JSON.stringify(spec)
 
+  const toggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen()
+    } else {
+      void shellRef.current?.requestFullscreen().catch(() => {})
+    }
+  }, [])
+
+  useEffect(() => {
+    const onFsChange = () => setFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onFsChange)
+    return () => document.removeEventListener('fullscreenchange', onFsChange)
+  }, [])
+
   useEffect(() => {
     if (!containerRef.current) return
     const graph = mountGraph(containerRef.current, specRef.current, false)
 
     const sync = () => onChange(graphToSpec(graph, specRef.current))
+
+    // 全屏切换等尺寸变化时画布自适应
+    const onResize = () => {
+      const el = containerRef.current
+      if (el) graph.resize(el.clientWidth, el.clientHeight)
+    }
+    window.addEventListener('resize', onResize)
+    onResize()
 
     graph.on('node:click', ({ node }) => setSelectedId(String(node.id)))
     graph.on('edge:click', ({ edge }) => setSelectedId(`${String(edge.getSourceCellId())}->${String(edge.getTargetCellId())}`))
@@ -40,6 +65,7 @@ export function DiagramCanvas({
     graph.on('edge:connected', sync)
 
     return () => {
+      window.removeEventListener('resize', onResize)
       graph.dispose()
     }
     // 画布只初始化一次；后续数据经画布自身交互产生并回流
@@ -80,8 +106,13 @@ export function DiagramCanvas({
   const selectedNode = spec.nodes.find(n => n.id === selectedId)
 
   return (
-    <div className="flex h-full min-h-[420px] flex-col gap-phi-sm">
-      <div className="flex items-center gap-phi-sm">
+    <div
+      ref={shellRef}
+      className={`flex h-full flex-col gap-phi-sm bg-bg ${
+        fullscreen ? 'p-phi-lg' : 'min-h-[420px]'
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-phi-sm">
         <button
           onClick={addNode}
           className="flex items-center gap-phi-xs rounded-md bg-accent/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent/25"
@@ -110,13 +141,26 @@ export function DiagramCanvas({
         >
           <LayoutGrid size={13} /> 自动布局 ↔
         </button>
+        <div className="flex-1" />
         <span className="text-xs text-sfg">
-          画布：拖动节点 · 从节点边缘拖出连线 · 点选后编辑属性
+          拖动节点 · 从边缘拖出连线 · 点选编辑属性
         </span>
+        <button
+          onClick={toggleFullscreen}
+          title={fullscreen ? '退出专注模式 (Esc)' : '专注模式：画布全屏编辑'}
+          className="flex items-center gap-phi-xs rounded-md bg-accent px-phi-sm py-phi-xs text-xs font-medium text-on-accent hover:opacity-90"
+        >
+          {fullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+          {fullscreen ? '退出专注' : '专注模式'}
+        </button>
       </div>
 
       <div className="flex min-h-0 flex-1 gap-phi-sm">
-        <div className="min-h-[380px] flex-1 overflow-hidden rounded-lg border border-outline bg-bg">
+        <div
+          className={`min-h-[380px] flex-1 overflow-hidden rounded-lg border border-outline bg-bg ${
+            fullscreen ? 'min-h-0' : ''
+          }`}
+        >
           <div key={remountKey} ref={containerRef} className="h-full w-full" />
         </div>
 

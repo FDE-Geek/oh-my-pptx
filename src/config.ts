@@ -1,10 +1,9 @@
 import type { PPTConfig } from './types'
 
 export const CONFIG: PPTConfig = {
-  title: 'oh-my-ppt',
+  title: 'Odoo 19 CE 启动链',
   author: 'abel',
-  accent: '#61b0f1',
-  themePreset: 'default',
+  themePreset: 'tech-share',
   transition: 'fade',
 
   theme: {
@@ -29,161 +28,183 @@ export const CONFIG: PPTConfig = {
   slides: [
     {
       type: 'cover',
-      title: 'oh-my-ppt',
-      subtitle: '极简、优雅、可定制的 HTML 演示工具',
-      notes: '开场：介绍项目动机，参考 Bento 的设计哲学。',
-    },
-    {
-      type: 'content',
-      title: '为什么做它',
-      step: true,
-      bullets: [
-        '参考 Bento 的设计哲学：极简、优雅、可定制',
-        'config.ts 单文件驱动全部内容',
-        '纯静态产物，无后端、可部署到任意平台',
-      ],
-      notes: '强调 config 驱动与纯静态两个卖点。',
-    },
-    { type: 'section', title: '核心特性', notes: '过渡页，停顿一下。' },
-    {
-      type: 'content',
-      title: '功能一览',
-      step: true,
-      layout: 'card',
-      bullets: [
-        '主题：深色 / 浅色手动切换，保存到 localStorage',
-        '自动主题：跟随操作系统 或 按时段切换',
-        '导航：键盘 ← → / 空格 / Home / End / F 全屏',
-        '概览模式 G、演讲者视图 S、PDF 导出 P',
-      ],
-      notes: '演示各快捷键。',
-    },
-    {
-      type: 'content',
-      title: '技术栈',
-      bullets: ['TypeScript', 'React 19', 'Tailwind CSS 4', 'Vite'],
-    },
-    {
-      type: 'two-column',
-      title: '两种哲学',
-      left: {
-        title: '传统 PPT',
-        bullets: ['二进制格式，锁定生态', '所见即所得编辑器', '动画靠手工调试'],
-      },
-      right: {
-        title: 'oh-my-ppt',
-        bullets: ['纯文本 config，git 管版本', '类型即 Schema，AI 友好', '纯静态产物，随处部署'],
-      },
-    },
-    {
-      type: 'quote',
-      quote: 'Talk is cheap. Show me the deck.',
-      author: 'Linus Torvalds (改编)',
-    },
-    {
-      type: 'code',
-      title: '一页 PPT 就是一个对象',
-      language: 'ts',
-      filename: 'config.ts',
-      code: `{
-  type: 'content',
-  title: '为什么做它',
-  step: true,
-  bullets: [
-    '极简、优雅、可定制',
-    'config 驱动全部内容',
-    '纯静态，无后端',
-  ],
-  notes: '讲者备注写在这里',
-}`,
-    },
-    {
-      type: 'chart',
-      title: '零依赖图表',
-      chart: {
-        kind: 'bar',
-        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        series: [
-          { name: '2025', data: [30, 48, 42, 61] },
-          { name: '2026', data: [45, 56, 63, 78] },
-        ],
-      },
-    },
-    {
-      type: 'chart',
-      title: '内容构成',
-      chart: {
-        kind: 'pie',
-        labels: ['内容页', '章节页', '图表页', '代码页'],
-        series: [{ name: '占比', data: [10, 2, 2, 1] }],
-      },
-    },
-    {
-      type: 'table',
-      title: '页型一览',
-      headers: ['页型', '用途', '关键字段'],
-      rows: [
-        ['cover / end', '封面与结尾', 'title, subtitle'],
-        ['section', '章节过渡', 'title'],
-        ['content', '要点列表', 'bullets, step'],
-        ['two-column', '对比呈现', 'left, right'],
-        ['quote', '引用', 'quote, author'],
-        ['code', '代码展示', 'code, language'],
-        ['image / table / chart', '多媒体与数据', 'src / rows / chart'],
-      ],
+      title: 'Odoo 19 CE 启动链',
+      subtitle: '从 odoo-bin 到接住第一个请求 · ThreadedServer 主线',
+      narration:
+        '大家好。这次我们把 Odoo 19 社区版启动时的完整链路过一遍：入口在 cli 的 server 命令，主线落在 service 模块，日常零 worker 跑的是 ThreadedServer。',
     },
     {
       type: 'diagram',
-      title: '图示：想法到成片',
+      title: '启动链全景',
       diagram: {
         layout: 'dagre',
         layoutDir: 'LR',
         nodes: [
-          { id: 'idea', x: 0, y: 0, label: '一个想法', fill: '#61b0f1' },
-          { id: 'config', x: 0, y: 0, label: 'config.ts' },
-          { id: 'ai', x: 0, y: 0, label: '需要 AI 修改吗？', shape: 'diamond' },
-          { id: 'human', x: 0, y: 0, label: '编辑器人工把关', shape: 'double-rect' },
-          { id: 'deck', x: 0, y: 0, label: '演示文稿' },
-          { id: 'video', x: 0, y: 0, label: 'webm 视频' },
+          { id: 'cli', x: 0, y: 0, label: 'cli/server.py', fill: '#5b8af8' },
+          { id: 'conf', x: 0, y: 0, label: '读配置 · 打横幅' },
+          { id: 'db', x: 0, y: 0, label: '数据库存在性' },
+          { id: 'sw', x: 0, y: 0, label: '进程级模块 base/rpc/web', shape: 'double-rect' },
+          { id: 'srv', x: 0, y: 0, label: '选进程模型 · 绑 HTTP' },
+          { id: 'reg', x: 0, y: 0, label: '预热 Registry', shape: 'double-rect' },
+          { id: 'loop', x: 0, y: 0, label: '常驻服务循环', fill: '#2e8a7a' },
         ],
         edges: [
-          { source: 'idea', target: 'config' },
-          { source: 'config', target: 'ai' },
-          { source: 'ai', target: 'human', label: '是' },
-          { source: 'human', target: 'config', dashed: true },
-          { source: 'ai', target: 'deck', label: '否' },
-          { source: 'deck', target: 'video' },
+          { source: 'cli', target: 'conf' },
+          { source: 'conf', target: 'db' },
+          { source: 'db', target: 'sw' },
+          { source: 'sw', target: 'srv' },
+          { source: 'srv', target: 'reg' },
+          { source: 'reg', target: 'loop' },
         ],
       },
-      notes: 'X6 图：dagre 自动布局（LR），菱形判断 + 双框过程 + 回环边。',
-    },
-    { type: 'section', title: '开始使用' },
-    {
-      type: 'content',
-      title: '快捷键',
-      bullets: [
-        '→ / 空格：下一页（或下一条）',
-        '←：上一页（或上一条）',
-        'Home / End：跳到首尾页',
-        'F：全屏 · G：概览 · S：演讲者视图 · P：打印导出',
-      ],
-    },
-    {
-      type: 'content',
-      title: 'AI 成片',
-      step: true,
       narration:
-        'AI 成片三步走。第一步，点击录制成片，选择整个屏幕或当前标签页。第二步，演示自动播放，每页旁白自动朗读，自动翻页。第三步，放映结束，视频自动下载，无需剪辑。',
+        '先看全景：七个阶段串成一条线。配置与横幅、数据库检查、进程级模块、进程模型与端口绑定、Registry 预热，最后进入常驻循环。下面逐段展开。',
+    },
+    {
+      type: 'section',
+      title: '阶段一 · 读配置',
+      subtitle: '解析参数，亮出身份',
+      narration: '第一阶段，读配置、打横幅。这一步决定后面所有行为。',
+    },
+    {
+      type: 'content',
+      title: '读配置、打横幅',
+      step: true,
       bullets: [
-        '点「录制成片」→ 选屏幕/标签页',
-        '自动放映：旁白朗读 + 自动翻页，逐条动画自动展开',
-        '结束自动停止，webm 视频自动下载',
+        '解析命令行 / 配置文件，装 logging',
+        'root 用户只警告，不阻止',
+        'db_user=postgres 直接退出',
+        'INFO 打版本、配置、连接串',
+        '有 replica 再补一行',
       ],
+      narration:
+        '解析命令行和配置文件，装配日志系统。用 root 跑只会警告；但 db_user 设成 postgres 会直接退出，这是安全底线。横幅用 INFO 级别打出版本、配置文件路径、addons 路径、数据库连接串，配置了只读副本的话再补一行。',
+    },
+    {
+      type: 'content',
+      title: '数据库是否存在',
+      step: true,
+      bullets: [
+        '对 db_name 里每个库逐个检查',
+        '不存在 → 建空库并置 init["base"]=True',
+        '已存在 → 跳过',
+        '建库权限不够只打 INFO，不中止',
+      ],
+      narration:
+        '接下来对配置里的每个库名做存在性检查。库不存在就建一个空库，并标记下一步要初始化 base 模块；库已存在直接跳过。权限不够建不了库也只记一条 INFO，不会中断启动。',
+    },
+    {
+      type: 'section',
+      title: '阶段二 · 进程与端口',
+      subtitle: '进程级模块 · 进程模型 · HTTP 绑定',
+      narration: '第二阶段，还没连业务库：先做进程级模块加载，再选进程模型、绑端口。',
+    },
+    {
+      type: 'two-column',
+      title: '进程级模块 vs 按库装模块',
+      left: {
+        title: 'load_server_wide_modules()',
+        bullets: [
+          '进程级 import，不属于任何库',
+          '默认加载 base、rpc、web',
+          '可用 --load 改列表',
+        ],
+      },
+      right: {
+        title: 'Registry.load_modules()',
+        bullets: [
+          '按库执行，稍后预热阶段才跑',
+          '读 ir.module.module 已安装集',
+          '-i / -u / --reinit 触发升级',
+        ],
+      },
+      narration:
+        '容易混淆的两个概念：进程级模块加载是 import，默认装 base、rpc、web 三个，用 dash load 可以改；而按库装模块发生在后面的 Registry 预热，依据是库里 ir dot module dot module 记录的已安装集合。',
+    },
+    {
+      type: 'table',
+      title: '选进程模型',
+      headers: ['启动条件', '进程模型', '备注'],
+      rows: [
+        ['默认（--workers 0）', 'ThreadedServer', '日常开发主线'],
+        ['Linux 64 位', 'glibc M_ARENA_MAX=2', '压虚拟内存'],
+        ['--workers N', 'PreforkServer', '多进程预派生'],
+        ['gevent', 'GeventServer', '长轮询协作调度'],
+        ['--dev=reload', 'inotify/watchdog', '文件变化自动重启'],
+      ],
+      narration:
+        '进程模型按参数选择：日常零 worker 是 ThreadedServer；Linux 64 位下还会把 glibc 的 arena 上限收到 2 来压虚拟内存。指定 workers 走 Prefork 预派发；gevent 场景走 GeventServer；dev reload 用 inotify 或 watchdog 监听文件变化。HTTP 开着就会绑端口，日志里会看到 werkzeug 运行在 8069 这一行。',
+    },
+    {
+      type: 'section',
+      title: '阶段三 · Registry 预热',
+      subtitle: '每个预加载库一次 Registry.new(dbname)',
+      narration: '第三阶段是启动链的重头戏：为每个预加载库构建一次 Registry。',
+    },
+    {
+      type: 'content',
+      title: 'Registry.new(dbname) 做什么',
+      step: true,
+      bullets: [
+        '建连接、初始化 signaling',
+        '确认库已初始化，先装 base',
+        '再按 ir.module.module 装已装模块',
+        '-i / -u / --reinit 才升级安装',
+        '结束打 Modules loaded 与耗时',
+      ],
+      narration:
+        'Registry 点 new 负责建连接和 signaling；随后 load_modules 先确认库已初始化，装上 base，再把库里登记过的已安装模块依次装载。只有带 dash i、dash u 或 reinit 参数才会走升级路径并打 updating modules list。收尾两行日志是 Modules loaded 和 Registry loaded 耗时。',
+    },
+    {
+      type: 'content',
+      title: '两个失败边界',
+      bullets: [
+        '没带 -i base 且库未初始化 → ERROR 后返回',
+        '此时不进服务循环，进程结束',
+      ],
+      narration:
+        '注意一个失败边界：如果库没有初始化过，又没有显式带 dash i base，启动会在 ERROR 后直接返回，不会进入服务循环。这也是空库首次启动必须指定初始化参数的原因。',
+      notes: '排查「起不来」问题时先看是不是踩了这个边界。',
+    },
+    {
+      type: 'section',
+      title: '阶段四 · 常驻',
+      subtitle: 'cron 线程 · 信号等待 · stop-after-init',
+      narration: '最后一个阶段：进入常驻。',
+    },
+    {
+      type: 'content',
+      title: '常驻服务循环',
+      step: true,
+      bullets: [
+        '起 cron 线程，数量看 max_cron_threads',
+        '主线程阻塞等 SIGINT / SIGTERM',
+        '信号再来一次才强退',
+        '--stop-after-init 预热完就退出',
+        '测试与模块升级常用此参数',
+      ],
+      narration:
+        '常驻阶段先拉起 cron 线程，数量看 max_cron_threads；主线程挂起等待中断或终止信号，再来一次信号才强制退出。如果带了 stop after init，预热完成就退出，测试和模块升级场景经常用。',
+    },
+    {
+      type: 'content',
+      title: '日常启动日志节奏',
+      layout: 'card',
+      bullets: [
+        '版本 → addons 路径',
+        '数据库连接信息',
+        'HTTP 已监听 8069',
+        'loading N modules...',
+        'Modules loaded 耗时行',
+      ],
+      narration:
+        '对照日常日志节奏：版本、addons 路径、数据库连接、HTTP 监听、逐模块加载、最后 Registry loaded。没有单独的启动完成标语——看到 HTTP 那行加 Registry loaded，就表示可以接请求了。',
     },
     {
       type: 'end',
       title: 'Thanks',
-      subtitle: 'fork it, hack it, present it',
+      subtitle: 'cli/server.py → service/server.py · ThreadedServer 主线',
+      narration: '启动链到此。谢谢。',
     },
   ],
 }
