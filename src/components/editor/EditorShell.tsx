@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   FileJson,
   FileCode2,
+  Film,
   FolderOpen,
   Redo2,
   RotateCcw,
@@ -20,6 +21,7 @@ import { ACCENTS } from '../ThemePanel'
 import { BUILTIN_THEMES } from '../../theme/presets'
 import { DeckContext } from '../DeckContext'
 import { downloadConfigTs, downloadJson, parseImportedFile } from '../../utils/export'
+import { toHyperframesComposition } from '../../utils/hyperframes'
 import { Field, TextInput, Select, Toggle, NumberInput } from './Controls'
 
 const NEW_SLIDE: Record<string, () => Slide> = {
@@ -179,6 +181,23 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
         >
           <FileJson size={14} />
           JSON
+        </button>
+        <button
+          onClick={() => {
+            const html = toHyperframesComposition(doc, { singleFileName: 'oh-my-ppt.html' })
+            const blob = new Blob([html], { type: 'text/html' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'composition.html'
+            a.click()
+            URL.revokeObjectURL(url)
+          }}
+          title="导出 HyperFrames composition（deck→MP4 的确定性渲染管线，需 npx hyperframes render）"
+          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-accent"
+        >
+          <Film size={14} />
+          MP4
         </button>
         <button
           onClick={() => downloadConfigTs(doc)}

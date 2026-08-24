@@ -33,7 +33,7 @@ export default function App() {
   const { dark, toggle, accent, pickAccent } = useTheme(DECK)
   const { current, step, overview, next, prev, goto, stepsOf, forceStep, toggleOverview } = useDeck(
     DECK.slides,
-    !editing,
+    !editing && !embedRef.current.frame,
   )
   const total = DECK.slides.length
   const currentRef = useRef(current)
@@ -128,10 +128,14 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [mode, cancel, openSpeaker, editing, enterEditor])
 
-  // 嵌入模式：autoplay 定时翻页，末页 loop 回 start 或停止
+  // 嵌入模式：frame=1 单页锁定（HyperFrames 逐页 iframe）；autoplay 定时翻页 + 循环
   useEffect(() => {
     if (!embed || editing) return
-    const { autoplay, loop, start } = embedRef.current
+    const { autoplay, loop, start, frame } = embedRef.current
+    if (frame) {
+      goto(start - 1)
+      return
+    }
     if (!autoplay) return
     goto(start - 1)
     let stopped = false

@@ -26,6 +26,12 @@
 
 ## 里程碑
 
+### v0.8.5 —— HyperFrames 借力路线（deck → 确定性 MP4）✅
+
+- [x] **composition 导出器**：`src/utils/hyperframes.ts`——deck → HyperFrames HTML composition：每页 iframe clip（`?embed=1&frame=1&start=N` 单页锁定）+ `data-start/duration` 时间轴（时长按旁白字数×语速近似推导）+ GSAP seekable timelines（step/animation 逐条入场）
+- [x] **frame 锁定模式**：`?frame=1` 单页渲染、禁键盘禁自动逻辑——供逐帧 seek
+- [x] **导出入口**：编辑器「MP4」按钮 / `node scripts/export-hyperframes.mjs`；产物 + 单文件 deck 同目录放 `npx hyperframes render` 即得确定性 MP4（自动获得 GSAP/音频/Lambda 分布式渲染全部能力）
+
 ### v0.5 —— 模板与品牌（对标 OpenDesign 的 DESIGN.md / 模板体系）✅
 
 - [x] **主题目录**：`ThemePreset`（`src/theme/presets.ts`），config `themePreset` 一行引用；优先级 会话选色 > preset > accent > 缺省

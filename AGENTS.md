@@ -102,6 +102,7 @@ npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
 - **prompt 库**：`prompts/index.ts`（full-deck / lightning-talk / data-review / tech-tutorial）
 - **质量闸**：`src/utils/lint.ts`——图表数据对齐、diagram 边引用、表格列数、bullets 超长、章节节奏等结构性检查；agent 生成 deck 后应心算过一遍同规则
 - **skill**：`skills/oh-my-ppt/SKILL.md`——Claude Code 安装后按工作流生成
+- **MP4 成片**：`node scripts/export-hyperframes.mjs` 或编辑器「MP4」按钮 → HyperFrames composition（每页 iframe clip + GSAP timelines）；与单文件 deck 同目录后 `npx hyperframes render` 出确定性 MP4
 
 ## 单文件分发（dist-single）
 
