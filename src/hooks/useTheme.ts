@@ -95,6 +95,12 @@ export function useTheme(config: DeckThemeSource) {
     }
   })
 
+  // 用户手动切换过 → 深色含舞台全局反转；自动跟随（OS/时段）→ 只暗 chrome。
+  const [manual, setManual] = useState<boolean>(
+    () => window.localStorage.getItem(STORAGE_KEY) !== null,
+  )
+  const invertSlides = theme.invertSlides === true || manual
+
   const preset = findTheme(config.themePreset)
   // 优先级：会话选色 > 主题预设（整套换装语义）> config 显式 accent > 缺省
   const accent = accentOverride ?? preset?.accent ?? config.accent ?? DEFAULT_ACCENT
@@ -102,12 +108,9 @@ export function useTheme(config: DeckThemeSource) {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
     // 不反转舞台时标记，chrome 变量组接管 UI 控件配色
-    document.documentElement.toggleAttribute(
-      'data-invert-slides',
-      config.theme.invertSlides === true,
-    )
-    applyDeckTheme(accent, dark, preset, config.theme.invertSlides === true)
-  }, [dark, accent, preset, config.theme.invertSlides])
+    document.documentElement.toggleAttribute('data-invert-slides', invertSlides)
+    applyDeckTheme(accent, dark, preset, invertSlides)
+  }, [dark, accent, preset, invertSlides])
 
   const pickAccent = useCallback((seed: string) => {
     setAccentOverride(seed)
@@ -123,6 +126,7 @@ export function useTheme(config: DeckThemeSource) {
       window.localStorage.setItem(STORAGE_KEY, current ? 'light' : 'dark')
       return !current
     })
+    setManual(true)
   }, [])
 
   return { dark, toggle, accent, pickAccent }
