@@ -115,7 +115,7 @@ export function DiagramCanvas({
       <div className="flex flex-wrap items-center gap-phi-sm">
         <button
           onClick={addNode}
-          className="flex items-center gap-phi-xs rounded-md bg-accent/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent/25"
+          className="flex items-center gap-phi-xs rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent-dim/30"
         >
           <Plus size={13} /> 添加节点
         </button>
@@ -130,14 +130,14 @@ export function DiagramCanvas({
         <button
           onClick={() => autoLayout('TB')}
           title="DAG 分层自动布局（上下）"
-          className="flex items-center gap-phi-xs rounded-md bg-accent/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent/25"
+          className="flex items-center gap-phi-xs rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent-dim/30"
         >
           <Wand2 size={13} /> 自动布局 ↕
         </button>
         <button
           onClick={() => autoLayout('LR')}
           title="DAG 分层自动布局（左右）"
-          className="flex items-center gap-phi-xs rounded-md bg-accent/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent/25"
+          className="flex items-center gap-phi-xs rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent-dim/30"
         >
           <LayoutGrid size={13} /> 自动布局 ↔
         </button>

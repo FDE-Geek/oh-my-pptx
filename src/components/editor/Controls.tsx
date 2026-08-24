@@ -158,7 +158,7 @@ export function ListEditor({
         <button
           type="button"
           onClick={onAdd}
-          className="rounded-md bg-accent/15 px-phi-sm py-0.5 text-xs text-accent hover:bg-accent/25"
+          className="rounded-md bg-accent-dim/15 px-phi-sm py-0.5 text-xs text-accent hover:bg-accent-dim/30"
         >
           + 添加
         </button>
@@ -170,7 +170,7 @@ export function ListEditor({
               <button
                 type="button"
                 onClick={() => index > 0 && onMove(index, index - 1)}
-                className="text-[10px] leading-none text-sfg hover:text-accent disabled:opacity-30"
+                className="text-[10px] leading-none text-sfg hover:text-[var(--chrome-accent)] disabled:opacity-30"
                 disabled={index === 0}
               >
                 ▲
@@ -178,7 +178,7 @@ export function ListEditor({
               <button
                 type="button"
                 onClick={() => index < items.length - 1 && onMove(index, index + 1)}
-                className="text-[10px] leading-none text-sfg hover:text-accent disabled:opacity-30"
+                className="text-[10px] leading-none text-sfg hover:text-[var(--chrome-accent)] disabled:opacity-30"
                 disabled={index === items.length - 1}
               >
                 ▼

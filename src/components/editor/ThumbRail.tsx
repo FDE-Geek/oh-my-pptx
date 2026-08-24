@@ -40,7 +40,7 @@ export function ThumbRail({
         <button
           onClick={onAdd}
           title="新增页面"
-          className="rounded-md bg-accent/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent/25"
+          className="rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-xs text-accent hover:bg-accent-dim/30"
         >
           <Plus size={14} />
         </button>
@@ -97,7 +97,7 @@ export function ThumbRail({
                   onDuplicate(index)
                 }}
                 title="复制此页"
-                className="rounded bg-bg/80 p-0.5 text-sfg hover:text-accent"
+                className="rounded bg-bg/80 p-0.5 text-sfg hover:text-[var(--chrome-accent)]"
               >
                 <Copy size={11} />
               </button>

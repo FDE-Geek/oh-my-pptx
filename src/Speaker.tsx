@@ -44,7 +44,7 @@ export default function Speaker() {
         </span>
         <button
           onClick={() => setRunning(r => !r)}
-          className="rounded-full bg-[var(--chrome-card)] px-phi-md py-phi-xs text-sm text-sfg tabular-nums hover:text-accent"
+          className="rounded-full bg-[var(--chrome-card)] px-phi-md py-phi-xs text-sm text-sfg tabular-nums hover:text-[var(--chrome-accent)]"
         >
           {running ? '⏸' : '▶'} {minutes}:{seconds}
         </button>

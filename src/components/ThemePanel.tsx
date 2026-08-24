@@ -36,7 +36,7 @@ export function ThemePanel({
         </span>
         <button
           onClick={onToggleDark}
-          className="flex items-center gap-phi-xs rounded-full bg-bg px-phi-sm py-phi-xs text-xs text-sfg transition-colors hover:text-accent"
+          className="flex items-center gap-phi-xs rounded-full bg-bg px-phi-sm py-phi-xs text-xs text-sfg transition-colors hover:text-[var(--chrome-accent)]"
         >
           {dark ? <Sun size={12} /> : <Moon size={12} />}
           {dark ? '浅色' : '深色'}

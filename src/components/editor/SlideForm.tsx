@@ -31,7 +31,7 @@ export function SlideForm({
   return (
     <div className="flex flex-col gap-phi-md">
       <Field label="页型">
-        <span className="rounded-md bg-accent/15 px-phi-sm py-phi-xs text-sm text-accent">
+        <span className="rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-sm text-accent">
           {slide.type}
         </span>
       </Field>

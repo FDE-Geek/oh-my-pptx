@@ -3,7 +3,7 @@ import { toggleFullscreen } from '../hooks/useDeck'
 
 export function Controls({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
   const buttonClass =
-    'rounded-full bg-[var(--chrome-card)] p-phi-sm text-[var(--chrome-sfg)] transition-colors duration-200 hover:text-accent'
+    'rounded-full bg-[var(--chrome-card)] p-phi-sm text-[var(--chrome-sfg)] transition-colors duration-200 hover:text-[var(--chrome-accent)]'
 
   return (
     <div className="absolute right-lg bottom-lg flex items-center gap-phi-sm">

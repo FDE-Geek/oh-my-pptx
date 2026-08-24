@@ -76,7 +76,7 @@ export function ContextMenu({ items }: { items: MenuItem[] }) {
           ) : (
             <button
               onClick={item.onClick}
-              className={`flex w-full items-center gap-phi-sm px-phi-md py-phi-sm text-left text-sm transition-colors hover:bg-accent/10 hover:text-accent ${
+              className={`flex w-full items-center gap-phi-sm px-phi-md py-phi-sm text-left text-sm transition-colors hover:bg-accent-dim/20 hover:text-[var(--chrome-accent)] ${
                 item.danger ? 'text-danger' : 'text-fg'
               }`}
             >

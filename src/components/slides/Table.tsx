@@ -7,7 +7,7 @@ export function Table({ slide }: { slide: TableSlide }) {
       <div className="h-1 w-14 rounded-full bg-accent" />
       <table className="w-full border-collapse overflow-hidden rounded-xl text-left">
         <thead>
-          <tr className="bg-accent/15">
+          <tr className="bg-accent-dim/15">
             {slide.headers.map(header => (
               <th key={header} className="px-5 py-3.5 text-lg font-semibold text-accent">
                 {header}

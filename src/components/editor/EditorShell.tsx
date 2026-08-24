@@ -115,7 +115,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
       <header className="flex items-center gap-phi-md border-b border-[var(--chrome-outline)] bg-[var(--chrome-card)] px-phi-md py-phi-sm">
         <button
           onClick={exit}
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-accent"
+          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
         >
           <ArrowLeft size={15} />
           放映
@@ -147,7 +147,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
           onClick={editor.undo}
           disabled={!editor.canUndo}
           title="撤销 (Ctrl+Z)"
-          className="rounded-md p-phi-xs text-sfg hover:text-accent disabled:opacity-30"
+          className="rounded-md p-phi-xs text-sfg hover:text-[var(--chrome-accent)] disabled:opacity-30"
         >
           <Undo2 size={16} />
         </button>
@@ -155,7 +155,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
           onClick={editor.redo}
           disabled={!editor.canRedo}
           title="重做 (Ctrl+Shift+Z)"
-          className="rounded-md p-phi-xs text-sfg hover:text-accent disabled:opacity-30"
+          className="rounded-md p-phi-xs text-sfg hover:text-[var(--chrome-accent)] disabled:opacity-30"
         >
           <Redo2 size={16} />
         </button>
@@ -163,7 +163,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
           onClick={() => setMetaOpen(o => !o)}
           title="deck 设置（标题/署名/主题/配音）"
           className={`flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm transition-colors ${
-            metaOpen ? 'bg-accent/15 text-accent' : 'text-sfg hover:text-accent'
+            metaOpen ? 'bg-accent-dim/15 text-accent' : 'text-sfg hover:text-[var(--chrome-accent)]'
           }`}
         >
           <Settings2 size={15} />
@@ -172,14 +172,14 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
         <button
           onClick={importFile}
           title="导入 config.ts / JSON（覆盖当前编辑内容，草稿将更新）"
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-accent"
+          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
         >
           <FolderOpen size={14} />
           导入
         </button>
         <button
           onClick={() => downloadJson(doc)}
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-accent"
+          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
         >
           <FileJson size={14} />
           JSON
@@ -196,7 +196,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
             URL.revokeObjectURL(url)
           }}
           title="导出 HyperFrames composition（deck→MP4 的确定性渲染管线，需 npx hyperframes render）"
-          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-accent"
+          className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-[var(--chrome-accent)]"
         >
           <Film size={14} />
           MP4
@@ -250,7 +250,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
             <button
               onClick={() => setMetaOpen(false)}
               className={`rounded-md px-phi-sm py-phi-xs text-xs font-medium transition-colors ${
-                !metaOpen ? 'bg-accent/15 text-accent' : 'text-sfg hover:text-accent'
+                !metaOpen ? 'bg-accent-dim/15 text-accent' : 'text-sfg hover:text-[var(--chrome-accent)]'
               }`}
             >
               页面设置 · 第 {selected + 1} 页（{current.type}）
@@ -258,7 +258,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
             <button
               onClick={() => setMetaOpen(true)}
               className={`rounded-md px-phi-sm py-phi-xs text-xs font-medium transition-colors ${
-                metaOpen ? 'bg-accent/15 text-accent' : 'text-sfg hover:text-accent'
+                metaOpen ? 'bg-accent-dim/15 text-accent' : 'text-sfg hover:text-[var(--chrome-accent)]'
               }`}
             >
               Deck 设置
@@ -309,7 +309,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
                   editor.addSlide(factory())
                   setAddOpen(false)
                 }}
-                className="rounded-lg border border-outline px-phi-md py-phi-sm text-left text-sm hover:border-accent hover:text-accent"
+                className="rounded-lg border border-outline px-phi-md py-phi-sm text-left text-sm hover:border-accent hover:text-[var(--chrome-accent)]"
               >
                 {type}
               </button>

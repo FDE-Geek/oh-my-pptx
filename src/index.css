@@ -99,13 +99,16 @@ h3 {
   --chrome-fg: var(--fg);
   --chrome-sfg: var(--sfg);
   --chrome-outline: var(--outline);
+  /* okee 语义：暗色下 accent 提亮一档（accentBright），保证暗底可读 */
+  --chrome-accent: var(--accent);
 }
-html.dark:not([data-invert-slides]) {
+html.dark {
   --chrome-bg: #15181d;
   --chrome-card: #232733;
   --chrome-fg: #dcdde3;
   --chrome-sfg: #8d8f97;
   --chrome-outline: #3a3742;
+  --chrome-accent: var(--accent-bright);
 }
 
 @keyframes slide-in {
