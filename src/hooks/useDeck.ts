@@ -22,6 +22,8 @@ export interface DeckState {
   stepsOf: (index: number) => number
   next: () => void
   prev: () => void
+  /** 时间轴驱动：直接跳到某一步（自动放映 animation 用）。 */
+  forceStep: (n: number) => void
   toggleOverview: () => void
   goto: (page: number, broadcast?: boolean) => void
 }
@@ -80,6 +82,8 @@ export function useDeck(slides: Slide[], enabled = true): DeckState {
   }, [overview, step, current, goto])
 
   const toggleOverview = useCallback(() => setOverview(o => !o), [])
+
+  const forceStep = useCallback((n: number) => setStep(Math.max(0, n)), [])
 
   useEffect(() => {
     const channel = createDeckChannel()
@@ -145,5 +149,5 @@ export function useDeck(slides: Slide[], enabled = true): DeckState {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [enabled, next, prev, goto, count])
 
-  return { current, step, overview, stepsOf, next, prev, toggleOverview, goto }
+  return { current, step, overview, stepsOf, next, prev, forceStep, toggleOverview, goto }
 }

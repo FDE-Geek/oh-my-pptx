@@ -5,8 +5,12 @@ interface SlideBase {
   transition?: Transition
   /** TTS 旁白文本；缺省时用 title+bullets 拼接 */
   narration?: string
-  /** 自动放映时该页停留毫秒数；缺省由朗读时长或默认值决定 */
+  /** 旁白音频文件地址（设置后此页不用 TTS，音频走 AudioMixer 混入录制流）。 */
+  narrationAudio?: string
+  /** 自动放映时该页停留毫秒数；缺省由朗读/音频时长或默认值决定 */
   duration?: number
+  /** 入场时序（毫秒）：自动放映时按时间轴显示 bullets；手动模式仍可 step 翻。 */
+  animation?: AnimationStep[]
 }
 
 export interface CoverSlide extends SlideBase {
@@ -177,6 +181,14 @@ export interface AutoplayConfig {
   enabled: boolean
   /** 无旁白页面的默认停留毫秒数 */
   defaultDuration: number
+}
+
+/** 逐页动画时间轴（自动放映时元素级入场时序，毫秒相对页面开始）。 */
+export interface AnimationStep {
+  /** 起始毫秒（0 = 与页面同时出现）。 */
+  at: number
+  /** 作用的元素序号：bullets 索引 / 图表系列等；缺省按声明顺序。 */
+  index?: number
 }
 
 export interface PPTConfig {

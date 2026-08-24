@@ -46,7 +46,9 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 
 - `notes` — 演讲者备注（Speaker 视图显示）
 - `narration` — TTS 旁白文本；缺省时由 title/bullets 自动拼接
+- `narrationAudio` — 旁白音频文件地址（优先于 TTS；录制时经 AudioMixer 混入视频音轨）
 - `duration` — 自动放映停留毫秒（无旁白页生效）
+- `animation` — 入场时间轴 `[{at: 毫秒, index?: 序号}]`，自动放映按毫秒逐条显示
 - `transition` — 覆盖全局切换动效
 
 ## diagram 页型（X6 图示）

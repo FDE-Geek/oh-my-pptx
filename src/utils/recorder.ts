@@ -1,7 +1,11 @@
+import { AudioMixer, combineStreams } from './mixer'
+
 export interface Recorder {
   start: () => Promise<void>
   stop: () => Promise<Blob>
   isSupported: boolean
+  /** 录制期可用的混音器（混入旁白音频等）；未启动时为 null。 */
+  mixer: AudioMixer | null
 }
 
 const VIDEO_MIME_CANDIDATES = [
@@ -17,7 +21,10 @@ function pickMime(): string | undefined {
   )
 }
 
-/** 混音：TTS 系统音频无法直接捕获，此实现捕获麦克风（可选）+ 屏幕 */
+/**
+ * 录屏 + 混音：屏幕视频轨与 AudioMixer 输出的音频轨合成后交给 MediaRecorder。
+ * 屏幕自带系统音频存在时也混入 mixer（如捕获标签页音频）。
+ */
 export function createRecorder(): Recorder {
   const supported =
     typeof navigator !== 'undefined' &&
@@ -27,13 +34,19 @@ export function createRecorder(): Recorder {
   let recorder: MediaRecorder | null = null
   let chunks: Blob[] = []
   let stream: MediaStream | null = null
+  const mixer = new AudioMixer()
 
   const start = async () => {
     if (!supported) throw new Error('此浏览器不支持屏幕录制（需要 getDisplayMedia）')
-    stream = await navigator.mediaDevices.getDisplayMedia({
+    const screen = await navigator.mediaDevices.getDisplayMedia({
       video: { frameRate: 30 },
       audio: true,
     })
+    // 屏幕音频轨（用户勾选共享音频时）混入 mixer，与旁白轨道合并
+    for (const track of screen.getAudioTracks()) {
+      mixer.mixStreamTrack(track)
+    }
+    stream = combineStreams(screen, mixer)
     stream.getVideoTracks()[0].addEventListener('ended', () => {
       recorder?.state === 'recording' && recorder.stop()
     })
@@ -50,6 +63,7 @@ export function createRecorder(): Recorder {
     new Promise<Blob>(resolve => {
       const finish = () => {
         stream?.getTracks().forEach(track => track.stop())
+        mixer.dispose()
         const blob = new Blob(chunks, { type: recorder?.mimeType ?? 'video/webm' })
         recorder = null
         stream = null
@@ -63,7 +77,7 @@ export function createRecorder(): Recorder {
       recorder.stop()
     })
 
-  return { start, stop, isSupported: supported }
+  return { start, stop, isSupported: supported, mixer }
 }
 
 export function downloadBlob(blob: Blob, filename: string) {

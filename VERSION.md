@@ -40,11 +40,11 @@
 - [x] **prompt 库**：`prompts/index.ts`——4 套模板（full-deck/lightning-talk/data-review/tech-tutorial）× schema 约束 × 写作守则 × 质量自检，CLI 与 skill 共用
 - [x] **内容质量闸**：`src/utils/lint.ts` 纯函数——页型结构/图表数据对齐/diagram 边引用/表格列数/bullets 超长/章节节奏，CLI 生成后强制跑（14 项规则实测命中）
 
-### v0.7 —— 成片增强（对标 HyperFrames 思路）
+### v0.7 —— 成片增强（对标 HyperFrames 思路）✅
 
-- [ ] **音频混入**：Edge TTS / 音频文件轨道 + AudioContext 混音，解决系统 TTS 录不进屏的问题
-- [ ] **逐页动画时间轴**：`animation` 字段声明元素级入场时序，录制自动执行
-- [ ] **确定性渲染**：deck → 逐页截图 → ffmpeg 合成（无头浏览器，需 Node CLI 辅助），产出对齐到帧的 MP4
+- [x] **音频混入**：`AudioMixer`（AudioContext → MediaStreamDestination）——旁白音频文件（`narrationAudio`）与屏幕系统音频混成单一音轨进 MediaRecorder，解决录屏无声
+- [x] **逐页动画时间轴**：slide `animation: [{at, index}]` 毫秒时序——自动放映按时间轴驱动逐条入场（替代固定 600ms）
+- [x] **确定性渲染（实验）**：`node scripts/render-video.mjs deck.html -o out.mp4`——headless Chromium 逐页截图 × ffmpeg 合成 H.264；依赖系统 chromium+ffmpeg（本机未装，帮助/探测/数据块解析路径已验证；截图管线经无头浏览器实测可行）
 
 ### v0.8 —— 协作与生态
 

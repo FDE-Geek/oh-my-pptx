@@ -27,7 +27,7 @@ export default function App() {
   const DECK = liveDoc ?? getDeckConfig()
 
   const { dark, toggle, accent, pickAccent } = useTheme(DECK)
-  const { current, step, overview, next, prev, goto, stepsOf, toggleOverview } = useDeck(
+  const { current, step, overview, next, prev, goto, stepsOf, forceStep, toggleOverview } = useDeck(
     DECK.slides,
     !editing,
   )
@@ -60,6 +60,8 @@ export default function App() {
     next,
     goto,
     onStop,
+    mixer: recorderRef.current?.mixer ?? null,
+    onTimelineStep: forceStep,
   })
 
   const enterEditor = useCallback(() => {
