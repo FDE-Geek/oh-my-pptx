@@ -1,13 +1,12 @@
 import type { SectionSlide } from '../../types'
+import { Heading, Lead, Kicker } from './Heading'
 
 export function Section({ slide }: { slide: SectionSlide }) {
   const items = slide.items
   if (items?.length) {
     return (
-      <div className="slide-enter flex w-full max-w-3xl flex-col items-start gap-phi-lg">
-        <p className="font-mono text-sm font-semibold tracking-[0.22em] text-accent uppercase">
-          {slide.title}
-        </p>
+      <div className="slide-enter mx-auto flex w-full max-w-3xl flex-col items-center gap-phi-2xl">
+        <Kicker kind="toc">{slide.title}</Kicker>
         <div className="flex w-full flex-col gap-phi-sm">
           {items.map((item, index) => (
             <div
@@ -17,9 +16,9 @@ export function Section({ slide }: { slide: SectionSlide }) {
               <span className="w-8 shrink-0 font-mono text-xl font-bold text-accent tabular-nums">
                 {String(index + 1).padStart(2, '0')}
               </span>
-              <span className="text-xl font-bold">{item.title}</span>
+              <Heading level={4}>{item.title}</Heading>
               {item.summary && (
-                <span className="ml-auto text-right text-sm text-sfg">{item.summary}</span>
+                <span className="ml-auto text-right text-caption text-sfg">{item.summary}</span>
               )}
             </div>
           ))}
@@ -29,12 +28,10 @@ export function Section({ slide }: { slide: SectionSlide }) {
   }
 
   return (
-    <div className="slide-enter flex w-full max-w-4xl flex-col items-start gap-phi-md">
-      <p className="font-mono text-sm font-semibold tracking-[0.3em] text-accent uppercase">
-        Section
-      </p>
-      <h2 className="text-6xl font-bold tracking-tight">{slide.title}</h2>
-      {slide.subtitle && <p className="text-2xl text-sfg">{slide.subtitle}</p>}
+    <div className="slide-enter mx-auto flex w-full max-w-4xl flex-col items-center gap-phi-md text-center">
+      <Kicker kind="section" />
+      <Heading level={2}>{slide.title}</Heading>
+      {slide.subtitle && <Lead>{slide.subtitle}</Lead>}
     </div>
   )
 }

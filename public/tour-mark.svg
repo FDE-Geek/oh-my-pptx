@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#e7eaee"/>
+  <rect x="80" y="60" width="800" height="420" rx="20" fill="#e6e9ef" stroke="#61b0f1" stroke-width="2"/>
+  <rect x="120" y="100" width="72" height="8" rx="4" fill="#61b0f1"/>
+  <text x="120" y="200" font-family="Inter, system-ui, sans-serif" font-size="56" font-weight="700" fill="#33353a">oh-my-ppt</text>
+  <text x="120" y="250" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#7d7f86">one HTML file · the deck is the software</text>
+  <rect x="120" y="300" width="160" height="96" rx="12" fill="#61b0f1"/>
+  <rect x="300" y="300" width="160" height="96" rx="12" fill="#dfe4ea"/>
+  <rect x="480" y="300" width="160" height="96" rx="12" fill="#dfe4ea"/>
+</svg>

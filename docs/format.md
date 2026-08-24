@@ -30,7 +30,7 @@
 | type | 必填字段 | 可选字段（页型专属） |
 |---|---|---|
 | `cover` | `title` | `subtitle` |
-| `section` | `title` | `subtitle` |
+| `section` | `title` | `subtitle`、`items: { title, summary? }[]`（有 items 时渲染为 TOC 目录页） |
 | `content` | `title` | `bullets: string[]`、`step: boolean`、`layout: "left"\|"center"\|"card"` |
 | `two-column` | `title, left, right` | 每列 `{ title?: string, bullets?: string[] }` |
 | `quote` | `quote` | `author` |
@@ -39,7 +39,7 @@
 | `table` | `title, headers, rows` | `headers: string[]`、`rows: string[][]` |
 | `chart` | `title, chart` | `chart: { kind, labels, series }` |
 | `diagram` | `title, diagram` | 见 §4 |
-| `end` | `title` | `subtitle` |
+| `end` | `title` | `subtitle`、`takeaways: string[]`（结尾记忆点） |
 
 chart 约束：`kind ∈ bar|line|pie`；每条 `series.data.length === labels.length`。
 
@@ -47,6 +47,7 @@ chart 约束：`kind ∈ bar|line|pie`；每条 `series.data.length === labels.l
 
 | 字段 | 类型 | 语义 |
 |---|---|---|
+| `tag` | string | 页眉面包屑（标题上方等宽小字，如 `§1 · 启动链路`） |
 | `notes` | string | 讲者备注（Speaker 视图） |
 | `narration` | string | TTS 旁白口播稿（缺省自动拼接 title/bullets） |
 | `narrationAudio` | string | 旁白音频 URL（优先于 TTS；录制时经 AudioMixer 混入） |
@@ -85,12 +86,14 @@ chart 约束：`kind ∈ bar|line|pie`；每条 `series.data.length === labels.l
 1. 产物为单一 HTML：JS/CSS 全内联，无外部请求，file:// 可开。
 2. 文档数据在 `<script type="application/json" id="oh-my-ppt-doc">…</script>` 明文块中。
 3. 块内 `<` 必须转义为 `\u003c`（禁止字面 `</script>` 进入数据块）。
-4. 运行时优先级：`sessionStorage[oh-my-ppt:preview-doc]` > `localStorage[oh-my-ppt:draft-doc]`（编辑草稿）> 明文块 > 内置 config。
+4. 运行时优先级：`localStorage[oh-my-ppt:draft-doc]`（编辑草稿）> `sessionStorage[oh-my-ppt:preview-doc]` > 明文块 > 内置 config。草稿最高，避免编辑中的内容被底层数据覆盖。
 5. `window.ohMyPpt` API：
    - `getDoc(): string` — 当前生效文档 JSON
    - `loadDoc(json): boolean` — 校验并热预览（写 sessionStorage 后刷新）
    - `importDesignMd(md): ThemePreset|null` — OpenDesign DESIGN.md 子集解析
    - `diffDocs(a, b): string` — 两份 deck 的文本化对比
+   - `validate(json?): string` — 质量闸 JSON
+   - `validateReport(json?): string` — 质量闸可读文本
 
 ## 6. 稳定性规则（实现方必须遵守）
 

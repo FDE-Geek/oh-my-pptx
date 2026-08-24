@@ -2,6 +2,7 @@ node_modules/
 dist/
 dist-single/
 .tmp-single/
+.tmp-generate/
 .gstack/
 *.local
 .DS_Store

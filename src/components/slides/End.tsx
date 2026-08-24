@@ -1,15 +1,16 @@
 import type { EndSlide } from '../../types'
+import { Heading, Lead } from './Heading'
 
 export function End({ slide }: { slide: EndSlide }) {
   return (
-    <div className="slide-enter flex flex-col items-center gap-6 text-center">
+    <div className="slide-enter flex flex-col items-center gap-phi-lg text-center">
       <div className="h-1.5 w-16 rounded-full bg-accent" />
-      <h1 className="text-7xl font-bold tracking-tight">{slide.title}</h1>
-      {slide.subtitle && <p className="text-2xl text-sfg">{slide.subtitle}</p>}
+      <Heading level={1}>{slide.title}</Heading>
+      {slide.subtitle && <Lead>{slide.subtitle}</Lead>}
       {slide.takeaways && (
-        <ul className="mt-phi-md flex flex-col gap-phi-sm">
+        <ul className="mt-phi-md flex flex-col items-center gap-phi-sm">
           {slide.takeaways.map(item => (
-            <li key={item} className="flex items-center gap-phi-sm text-xl text-sfg">
+            <li key={item} className="flex items-center justify-center gap-phi-sm text-body text-sfg">
               <span className="text-accent">▸</span>
               {item}
             </li>

@@ -1,5 +1,6 @@
 import type { ContentSlide } from '../../types'
 import { SlideTag } from './SlideTag'
+import { Heading } from './Heading'
 
 export function Content({
   slide,
@@ -16,16 +17,18 @@ export function Content({
 
   if (layout === 'center') {
     return (
-      <div className="slide-enter flex w-full max-w-3xl flex-col items-center gap-phi-lg text-center">
-        <SlideTag tag={slide.tag} />
-          <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
-        <div className="h-1 w-14 rounded-full bg-accent" />
+      <div className="slide-enter mx-auto flex w-full max-w-3xl flex-col items-center gap-phi-2xl text-center">
+        <header className="flex flex-col items-center gap-phi-sm">
+          <SlideTag tag={slide.tag} />
+          <Heading level={3}>{slide.title}</Heading>
+          <div className="h-1 w-14 rounded-full bg-accent" />
+        </header>
         <ul className="flex flex-col items-center gap-phi-md">
           {bullets.map((bullet, index) => (
             <li
               key={bullet}
-              className={`text-2xl transition-all duration-300 ${
-                visible(index) ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+              className={`text-body transition-all duration-300 ${
+                visible(index) ? 'translate-y-0 opacity-100' : 'hidden'
               }`}
             >
               {bullet}
@@ -38,19 +41,21 @@ export function Content({
 
   if (layout === 'card') {
     return (
-      <div className="slide-enter flex w-full max-w-4xl flex-col items-start gap-phi-lg">
-        <SlideTag tag={slide.tag} />
-          <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
-        <div className="grid w-full grid-cols-2 gap-phi-md">
+      <div className="slide-enter mx-auto flex w-full max-w-4xl flex-col items-center gap-phi-2xl">
+        <header className="flex flex-col items-center gap-phi-sm">
+          <SlideTag tag={slide.tag} />
+          <Heading level={3} className="text-center">{slide.title}</Heading>
+        </header>
+        <div className="flex w-full flex-wrap justify-center gap-phi-md">
           {bullets.map((bullet, index) => (
             <div
               key={bullet}
-              className={`flex items-center gap-phi-sm rounded-xl border border-outline bg-card p-phi-md transition-all duration-300 ${
-                visible(index) ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+              className={`flex w-[calc(50%-0.5rem)] min-w-[16rem] items-center gap-phi-sm rounded-xl border border-outline bg-card p-phi-md transition-all duration-300 ${
+                visible(index) ? 'translate-y-0 opacity-100' : 'hidden'
               }`}
             >
               <span className="h-2 w-2 shrink-0 rounded-[4px] bg-accent" />
-              <span className="text-xl">{bullet}</span>
+              <span className="text-body">{bullet}</span>
             </div>
           ))}
         </div>
@@ -59,16 +64,18 @@ export function Content({
   }
 
   return (
-    <div className="slide-enter flex w-full max-w-3xl flex-col items-start gap-phi-lg">
-      <SlideTag tag={slide.tag} />
-          <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
-      <div className="h-1 w-14 rounded-full bg-accent" />
-      <ul className="flex flex-col gap-phi-md">
+    <div className="slide-enter mx-auto flex w-full max-w-3xl flex-col items-center gap-phi-2xl">
+      <header className="flex flex-col items-center gap-phi-sm">
+        <SlideTag tag={slide.tag} />
+        <Heading level={3} className="text-center">{slide.title}</Heading>
+        <div className="h-1 w-14 rounded-full bg-accent" />
+      </header>
+      <ul className="flex max-w-2xl flex-col items-start gap-phi-md">
         {bullets.map((bullet, index) => (
           <li
             key={bullet}
-            className={`flex items-center gap-phi-md text-2xl transition-all duration-300 ${
-              visible(index) ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+            className={`flex items-center gap-phi-md text-body transition-all duration-300 ${
+              visible(index) ? 'translate-y-0 opacity-100' : 'hidden'
             }`}
           >
             <span className="h-2 w-2 shrink-0 rounded-[4px] bg-accent" />

@@ -174,13 +174,44 @@ export function lintDeck(doc: PPTConfig): LintIssue[] {
     }
   })
 
+  // 现场经验层：备注覆盖（仅演讲稿；分母排除结构页）
+  if (doc.narration?.enabled) {
+    const body = doc.slides.filter(s => s.type !== 'cover' && s.type !== 'section' && s.type !== 'end')
+    if (body.length > 0) {
+      const covered = body.filter(s => typeof s.notes === 'string' && s.notes.trim().length > 0).length
+      if (covered / body.length < 0.5) {
+        issues.push({
+          page: 0,
+          level: 'warn',
+          code: 'notes-coverage',
+          message: `正文页备注覆盖 ${covered}/${body.length}（<50%），建议每页 notes 写目的+转场`,
+        })
+      }
+    }
+  }
+
+  // 现场经验层：收束双缺才报（end.takeaways 或末三页 quote）
+  const last = doc.slides[doc.slides.length - 1]
+  const endHasTakeaways = last?.type === 'end'
+    && Array.isArray(last.takeaways)
+    && last.takeaways.length > 0
+  const last3HasQuote = doc.slides.slice(-3).some(s => s.type === 'quote')
+  if (!endHasTakeaways && !last3HasQuote) {
+    issues.push({
+      page: doc.slides.length,
+      level: 'warn',
+      code: 'narrative-tail',
+      message: '收束不完整：end 缺 takeaways 且末三页无 quote',
+    })
+  }
+
   return issues
 }
 
 export function formatIssues(issues: LintIssue[]): string {
   if (issues.length === 0) return '✓ 质量检查通过，无问题'
   const lines = issues.map(
-    issue => `${issue.level === 'error' ? '✗' : '⚠'} ${issue.message}`,
+    issue => `${issue.level === 'error' ? '✗' : '⚠'} [${issue.code}] ${issue.message}`,
   )
   const errors = issues.filter(i => i.level === 'error').length
   return `${lines.join('\n')}\n\n共 ${errors} 错误 / ${issues.length - errors} 警告`

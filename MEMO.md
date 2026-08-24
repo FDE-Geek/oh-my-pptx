@@ -68,6 +68,12 @@
 ### 10. esbuild 在 Vite 8 下不是直接依赖
 - build-single.mjs 用 esbuild 编译 config.ts 时 `Cannot find package` → 显式 `npm i -D esbuild`
 
+### 11. 吸收 guizang-ppt-skill 生成质量（2026-08-25，v2）
+- 来源：`docs/plan/2026-08-25-guizang-skill-absorb.md`（v2 按评审修订后落地）
+- 做了：五问澄清（CLI `--ask`，默认不问）+ 四模板叙事弧/讲稿双栏 + lint `notes-coverage` / `narrative-tail` + generate 改接 `lintDeck`
+- v2 砍除：`duration-budget`（时长模型对不上，backlog：`lintDeck(doc, { budgetMinutes })` + `slideDurationMs`）；`narrative-hook`（不可机械判定）
+- 验收靠夹具与 mock 端点，不依赖本机 Ollama
+
 ## 架构决策记录
 
 | 决策 | 理由 | 备选方案（被否） |
@@ -85,7 +91,7 @@
 - [ ] `npm run tts`：Edge TTS 真实合成（本机到 speech.platform.bing.com WSS 不通，CLI 链路/错误归因/引用片段生成已验证；网络通了直接重跑）
 - [ ] `npx hyperframes render`：composition.html → MP4（网络 + ffmpeg + chromium）
 - [ ] `node scripts/render-video.mjs`：截图合成版（chromium + ffmpeg）
-- [ ] `npm run generate -- "主题"`：真实 Ollama 生成（`ollama pull qwen3:8b`）
+- [ ] `npm run generate -- "主题"`：真实 Ollama 生成（`ollama pull qwen3:8b`）；生成稿 notes 覆盖与目的/转场形状标「有端点再验」
 - [ ] narrationAudio 全链路：音频文件 → AudioMixer → 录制 WebM 音轨可闻
 - [ ] 单文件 deck 在 file:// 下双击打开（Safari/Firefox 各验一遍）
 
@@ -95,8 +101,9 @@
 npm run dev            # 开发（热更新）
 npm run build          # tsc + vite build → dist/
 npm run build:single   # 单文件 → dist-single/oh-my-ppt.html（当前 ~940KB）
-npm test               # vitest（20 项）
+npm test               # vitest
 npm run generate -- "主题" -o deck.json   # AI 生成（需端点）
+npm run generate -- "主题" --ask          # 可选澄清五问后再生成
 node scripts/export-hyperframes.mjs       # composition 导出
 ```
 

@@ -1,10 +1,15 @@
 import type { TableSlide } from '../../types'
+import { SlideTag } from './SlideTag'
+import { Heading } from './Heading'
 
 export function Table({ slide }: { slide: TableSlide }) {
   return (
-    <div className="slide-enter flex w-full max-w-4xl flex-col items-start gap-8">
-      <h2 className="text-5xl font-bold tracking-tight">{slide.title}</h2>
-      <div className="h-1 w-14 rounded-full bg-accent" />
+    <div className="slide-enter mx-auto flex w-full max-w-4xl flex-col items-center gap-phi-2xl">
+      <header className="flex flex-col items-center gap-phi-sm">
+        <SlideTag tag={slide.tag} />
+        <Heading level={3} className="text-center">{slide.title}</Heading>
+        <div className="h-1 w-14 rounded-full bg-accent" />
+      </header>
       <table className="w-full border-collapse overflow-hidden rounded-xl text-left">
         <thead>
           <tr className="bg-accent-dim/15">

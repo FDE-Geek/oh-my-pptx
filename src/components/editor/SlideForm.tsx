@@ -10,6 +10,8 @@ import type {
   ChartSlide,
   ColumnContent,
   DiagramSlide,
+  SectionSlide,
+  EndSlide,
 } from '../../types'
 import { Field, TextInput, TextArea, Select, Toggle, ListEditor } from './Controls'
 import { DiagramCanvas } from './DiagramCanvas'
@@ -34,6 +36,13 @@ export function SlideForm({
         <span className="rounded-md bg-accent-dim/15 px-phi-sm py-phi-xs text-sm text-accent">
           {slide.type}
         </span>
+      </Field>
+      <Field label="页眉面包屑（tag）">
+        <TextInput
+          value={slide.tag ?? ''}
+          placeholder="§1 · 章节名（可选）"
+          onChange={v => onChange({ tag: v || undefined })}
+        />
       </Field>
 
       <SwitchByType slide={slide} onChange={onChange} />
@@ -72,8 +81,6 @@ function SwitchByType({
 }) {
   switch (slide.type) {
     case 'cover':
-    case 'section':
-    case 'end':
       return (
         <>
           <Field label="标题">
@@ -87,6 +94,80 @@ function SwitchByType({
           </Field>
         </>
       )
+    case 'section': {
+      const section = slide as SectionSlide
+      const items = section.items ?? []
+      return (
+        <>
+          <Field label="标题">
+            <TextInput value={section.title} onChange={v => onChange({ title: v })} />
+          </Field>
+          <Field label="副标题">
+            <TextInput
+              value={section.subtitle ?? ''}
+              onChange={v => onChange({ subtitle: v || undefined })}
+            />
+          </Field>
+          <ListEditor
+            label={`目录条目（${items.length}，有则渲染 TOC）`}
+            items={items}
+            onAdd={() => onChange({ items: [...items, { title: '新条目' }] })}
+            onRemove={i => onChange({ items: items.filter((_, j) => j !== i) })}
+            onMove={(from, to) => {
+              const next = [...items]
+              const [moved] = next.splice(from, 1)
+              next.splice(to, 0, moved)
+              onChange({ items: next })
+            }}
+          >
+            {i => (
+              <div className="flex flex-col gap-phi-xs">
+                <TextInput
+                  value={items[i].title}
+                  placeholder="条目标题"
+                  onChange={v =>
+                    onChange({
+                      items: items.map((item, j) => (j === i ? { ...item, title: v } : item)),
+                    })
+                  }
+                />
+                <TextInput
+                  value={items[i].summary ?? ''}
+                  placeholder="摘要（可选）"
+                  onChange={v =>
+                    onChange({
+                      items: items.map((item, j) =>
+                        j === i ? { ...item, summary: v || undefined } : item,
+                      ),
+                    })
+                  }
+                />
+              </div>
+            )}
+          </ListEditor>
+        </>
+      )
+    }
+    case 'end': {
+      const end = slide as EndSlide
+      return (
+        <>
+          <Field label="标题">
+            <TextInput value={end.title} onChange={v => onChange({ title: v })} />
+          </Field>
+          <Field label="副标题">
+            <TextInput
+              value={end.subtitle ?? ''}
+              onChange={v => onChange({ subtitle: v || undefined })}
+            />
+          </Field>
+          <BulletsEditor
+            bullets={end.takeaways ?? []}
+            onChange={takeaways => onChange({ takeaways: takeaways.length ? takeaways : undefined })}
+          />
+        </>
+      )
+    }
     case 'content': {
       const content = slide as ContentSlide
       return (

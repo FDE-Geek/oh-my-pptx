@@ -31,7 +31,7 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 | type | 必填字段 | 可选字段 |
 |---|---|---|
 | `cover` | `title` | `subtitle` |
-| `section` | `title` | `subtitle` |
+| `section` | `title` | `subtitle`、`items: { title, summary? }[]`（有则渲染 TOC 目录页） |
 | `content` | `title` | `bullets: string[]`、`step: true`（逐条出现）、`layout: 'center'/'card'`（版式） |
 | `two-column` | `title, left, right` | 每列 `{ title?, bullets? }` |
 | `quote` | `quote` | `author` |
@@ -40,10 +40,11 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 | `table` | `title, headers, rows` | — |
 | `chart` | `title, chart` | `chart: { kind, labels, series }`，kind 为 `bar/line/pie` |
 | `diagram` | `title, diagram` | `diagram: { nodes, edges }`，X6 图示（详见下） |
-| `end` | `title` | `subtitle` |
+| `end` | `title` | `subtitle`、`takeaways: string[]`（结尾记忆点） |
 
 所有页型共有可选字段：
 
+- `tag` — 页眉面包屑（标题上方，如 `§1 · 启动链路`）
 - `notes` — 演讲者备注（Speaker 视图显示）
 - `narration` — TTS 旁白文本；缺省时由 title/bullets 自动拼接
 - `narrationAudio` — 旁白音频文件地址（优先于 TTS；录制时经 AudioMixer 混入视频音轨）
@@ -98,9 +99,12 @@ npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
 
 ## AI 生成工具链（v0.6+）
 
-- **CLI**：`npm run generate -- "主题" --prompt tech-tutorial -o deck.json`——OpenAI 兼容端点（缺省 Ollama `qwen3:8b`），生成后自动质量闸
-- **prompt 库**：`prompts/index.ts`（full-deck / lightning-talk / data-review / tech-tutorial）
-- **质量闸**：`src/utils/lint.ts`——图表数据对齐、diagram 边引用、表格列数、bullets 超长、章节节奏等结构性检查；agent 生成 deck 后应心算过一遍同规则
+四步循环：**澄清（可选）→ 叙事弧 + 讲稿规划 → 生成 → 质量闸**。
+
+- **CLI**：`npm run generate -- "主题" --prompt tech-tutorial -o deck.json`——OpenAI 兼容端点（缺省 Ollama `qwen3:8b`），生成后自动质量闸（`lintDeck`）。`--ask` 进入澄清五问（风格/受众/时长/素材/硬约束）；缺省不打断。
+- **prompt 库**：`prompts/index.ts`（full-deck / lightning-talk / data-review / tech-tutorial）；页数按模板注入（lightning 固定 6–8，不吃时长换算）。`prompts/clarify.ts` 为五问题库。
+- **讲稿分工**：`notes` = 讲者目的 + 转场；`narration` = TTS 完整口播句。二者不要写反。
+- **质量闸**：`src/utils/lint.ts`——图表数据对齐、diagram 边引用、表格列数、bullets 超长、章节节奏，以及现场经验层 `notes-coverage` / `narrative-tail`（warn）；agent 生成 deck 后应心算过一遍同规则
 - **skill**：`skills/oh-my-ppt/SKILL.md`——Claude Code 安装后按工作流生成
 - **MP4 成片**：`node scripts/export-hyperframes.mjs` 或编辑器「MP4」按钮 → HyperFrames composition（每页 iframe clip + GSAP timelines）；与单文件 deck 同目录后 `npx hyperframes render` 出确定性 MP4
 - **TTS 预生成**：`npm run tts`（`src/tts/` Provider 抽象：system/edge 可扩展云端）——Edge neural 音色（`--voice zh-CN-XiaoxiaoNeural` 等 8 个内置）逐页生成 MP3 到 `assets/narration/`，并在 `narration-refs.txt` 输出各页 `narrationAudio` 引用片段；放映/录制自动优先用音频文件（AudioMixer 混入录制音轨）
@@ -114,7 +118,7 @@ npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
 
 1. `#oh-my-ppt-doc` 块必须保持明文 JSON、同 id、可正则提取——这是 splice 契约，外部工具靠它原地换内容。
 2. 序列化时 `<` 必须转义为 `\u003c`，绝不允许字面 `</script>` 进入数据块。
-3. 运行时优先级：`sessionStorage 预览 > #oh-my-ppt-doc 块 > 内置 config.ts`。
+3. 运行时优先级：`localStorage 编辑草稿 > sessionStorage 预览 > #oh-my-ppt-doc 块 > 内置 config.ts`。
 4. `window.ohMyPpt.loadDoc(json)` 校验并热预览（存 sessionStorage 后刷新）；`window.ohMyPpt.getDoc()` 返回当前文档 JSON。AI round-trip：getDoc 导出 → 修改 → loadDoc 预览 → 满意后把 JSON 写回数据块或 config.ts。
 5. 单文件模式下演讲者视图经 `?speaker` 查询参数打开（无独立 speaker.html）。
 

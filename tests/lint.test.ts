@@ -24,7 +24,7 @@ describe('lintDeck', () => {
       slides: [
         { type: 'cover', title: 'T' },
         { type: 'content', title: 'A', bullets: ['短句'] },
-        { type: 'end', title: 'Thanks' },
+        { type: 'end', title: 'Thanks', takeaways: ['带走一句'] },
       ],
     }
     expect(lintDeck(doc)).toHaveLength(0)
@@ -84,5 +84,110 @@ describe('lintDeck', () => {
   it('formatIssues 输出统计行', () => {
     const out = formatIssues([])
     expect(out).toContain('通过')
+  })
+
+  it('notes-coverage：正文页 <50% 有 notes 才报（排除 cover/section/end）', () => {
+    const body = [
+      { type: 'content' as const, title: 'A', bullets: ['x'], notes: '目的：A。转场：B。' },
+      { type: 'content' as const, title: 'B', bullets: ['x'] },
+      { type: 'chart' as const, title: 'c', chart: { kind: 'bar' as const, labels: ['a'], series: [{ name: 's', data: [1] }] } },
+      { type: 'quote' as const, quote: '金句' },
+    ]
+    const below: PPTConfig = {
+      ...base,
+      narration: { ...base.narration, enabled: true },
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'section', title: '章' },
+        ...body,
+        { type: 'end', title: 'x', takeaways: ['记住'] },
+      ],
+    }
+    expect(lintDeck(below).some(i => i.code === 'notes-coverage')).toBe(true)
+
+    const atHalf: PPTConfig = {
+      ...below,
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'section', title: '章' },
+        body[0],
+        { ...body[1], notes: '目的：B。转场：图。' },
+        body[2],
+        body[3],
+        { type: 'end', title: 'x', takeaways: ['记住'] },
+      ],
+    }
+    expect(lintDeck(atHalf).some(i => i.code === 'notes-coverage')).toBe(false)
+  })
+
+  it('notes-coverage：narration 关闭或只有结构页则不报', () => {
+    const off: PPTConfig = {
+      ...base,
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'content', title: 'A', bullets: ['x'] },
+        { type: 'end', title: 'x', takeaways: ['记住'] },
+      ],
+    }
+    expect(lintDeck(off).some(i => i.code === 'notes-coverage')).toBe(false)
+
+    const structureOnly: PPTConfig = {
+      ...base,
+      narration: { ...base.narration, enabled: true },
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'section', title: '章' },
+        { type: 'end', title: 'x', takeaways: ['记住'] },
+      ],
+    }
+    expect(lintDeck(structureOnly).some(i => i.code === 'notes-coverage')).toBe(false)
+  })
+
+  it('narrative-tail：end 缺 takeaways 且末三页无 quote 才报', () => {
+    const bothMissing: PPTConfig = {
+      ...base,
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'content', title: 'A', bullets: ['x'] },
+        { type: 'end', title: 'x' },
+      ],
+    }
+    expect(lintDeck(bothMissing).some(i => i.code === 'narrative-tail')).toBe(true)
+
+    const hasTakeaways: PPTConfig = {
+      ...bothMissing,
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'content', title: 'A', bullets: ['x'] },
+        { type: 'end', title: 'x', takeaways: ['记住'] },
+      ],
+    }
+    expect(lintDeck(hasTakeaways).some(i => i.code === 'narrative-tail')).toBe(false)
+
+    const hasQuote: PPTConfig = {
+      ...base,
+      slides: [
+        { type: 'cover', title: 'T' },
+        { type: 'quote', quote: '少即是多。' },
+        { type: 'end', title: 'x' },
+      ],
+    }
+    expect(lintDeck(hasQuote).some(i => i.code === 'narrative-tail')).toBe(false)
+  })
+
+  it('tag / items / takeaways 是合法字段', () => {
+    const doc: PPTConfig = {
+      ...base,
+      slides: [
+        { type: 'cover', title: 'T', tag: 'v1' },
+        {
+          type: 'section',
+          title: '目录',
+          items: [{ title: '一', summary: '摘要' }],
+        },
+        { type: 'end', title: 'Thanks', takeaways: ['记住这一句'] },
+      ],
+    }
+    expect(lintDeck(doc)).toHaveLength(0)
   })
 })

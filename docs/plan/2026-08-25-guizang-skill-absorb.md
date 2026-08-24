@@ -1,6 +1,6 @@
 # 计划：吸收 guizang-ppt-skill 的生成质量设计
 
-> 状态：v2 草案（已按评审意见修订，待开工）
+> 状态：v2 已落地（2026-08-25）
 > 日期：2026-08-25（v2 同日）
 > 来源研究：`~/EA/guizang-ppt-skill`（歸藏 · op7418/guizang-ppt-skill）
 > 关联：VERSION.md v0.6 AI 生成工具链的增量强化，非新版本号

@@ -63,9 +63,9 @@
 ### v1.0 —— 稳定契约
 
 - [x] **格式规范冻结**：`docs/format.md`——normative 数据模型规范（11 页型/共有字段/diagram/splice 契约/稳定性规则），承诺向后兼容
-- [x] **测试基线**：Vitest 单测 20 项（lint 质量闸 / OKLCH 色彩科学 / 画布停点 / DESIGN.md 解析 / deck diff），`npm test`
+- [x] **测试基线**：Vitest 单测 26 项（lint 质量闸 / OKLCH 色彩科学 / 画布停点 / DESIGN.md 解析 / deck diff），`npm test`
 - [ ] **无障碍**：键盘全流程、ARIA 标注、对比度审计（复用 contrastOn 已有算法）——收尾中
-- [ ] **文档站**：单文件构建的官方文档站（用 oh-my-ppt 演示 oh-my-ppt）——收尾中
+- [x] **文档站**：`src/examples/tour.ts` 即官方文档 deck（11 页型自证 + 写作/快捷键/成片）；`cp src/examples/tour.ts src/config.ts` 后 `npm run build:single` 即文档站
 
 ## 不做清单（Non-goals）
 

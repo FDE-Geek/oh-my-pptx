@@ -40,6 +40,34 @@
   --spacing-phi-3xl: calc(var(--spacing-phi-md, 1rem) * 6.854); /* md×φ⁴ ≈ 109.7px */
 }
 
+/*
+ * 标题阶梯（与间距同一套 φ）：
+ *   4 列标题  = 1rem × φ     ≈ 25.9px
+ *   3 页标题  = 1rem × φ²    ≈ 41.9px
+ *   2 章节    = 1rem × φ²√φ  ≈ 53.3px
+ *   1 封面    = 1rem × φ³    ≈ 67.8px
+ * 正文 / 副题 / 页眉另档，不挤占标题阶梯。
+ */
+@theme {
+  --text-heading-4: 1.618rem;
+  --text-heading-4--line-height: 1.3;
+  --text-heading-3: 2.618rem;
+  --text-heading-3--line-height: 1.2;
+  --text-heading-2: 3.33rem;
+  --text-heading-2--line-height: 1.15;
+  --text-heading-1: 4.236rem;
+  --text-heading-1--line-height: 1.12;
+  --text-lead: 1.25rem;
+  --text-lead--line-height: 1.45;
+  --text-body: 1.25rem;
+  --text-body--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-kicker: 1rem;
+  --text-kicker--line-height: 1.4;
+  --tracking-kicker: 0.18em;
+}
+
 /* 主题预设字体（useTheme 写入；空值回落系统栈） */
 :root {
   --font-body: '';

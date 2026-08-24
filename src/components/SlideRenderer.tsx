@@ -11,11 +11,16 @@ import { Table } from './slides/Table'
 import { ChartSlideView } from './slides/Chart'
 import type { DiagramSlide } from '../types'
 import { DiagramView } from './slides/Diagram'
+import { SlideTag } from './slides/SlideTag'
+import { Heading, Kicker } from './slides/Heading'
 
 function DiagramSlideView({ slide }: { slide: DiagramSlide }) {
   return (
-    <div className="slide-enter flex h-[540px] w-full max-w-4xl flex-col items-start gap-phi-md">
-      <h2 className="text-4xl font-bold tracking-tight">{slide.title}</h2>
+    <div className="slide-enter mx-auto flex h-[540px] w-full max-w-4xl flex-col items-center gap-phi-2xl">
+      <header className="flex flex-col items-center gap-phi-sm">
+        <SlideTag tag={slide.tag} />
+        <Heading level={3} className="text-center">{slide.title}</Heading>
+      </header>
       <div className="min-h-0 flex-1 w-full overflow-hidden rounded-xl border border-outline bg-card">
         <DiagramView spec={slide.diagram} />
       </div>
@@ -68,9 +73,7 @@ export function SlideRenderer({
         // 格式规范：未知页型渲染占位页（不崩、不丢页码）
         return (
           <div className="flex flex-col items-center gap-phi-md text-center">
-            <p className="font-mono text-sm tracking-widest text-accent uppercase">
-              未知页型
-            </p>
+            <Kicker>未知页型</Kicker>
             <p className="text-4xl font-bold text-sfg">{(slide as { type: string } | undefined)?.type}</p>
           </div>
         )
@@ -87,5 +90,5 @@ export function SlideRenderer({
           ? ''
           : 'slide-enter'
 
-  return <div className={`${animation} w-full`.trim()}>{body}</div>
+  return <div className={`${animation} flex w-full justify-center`.trim()}>{body}</div>
 }

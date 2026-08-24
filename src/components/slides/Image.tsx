@@ -1,9 +1,14 @@
 import type { ImageSlide } from '../../types'
+import { SlideTag } from './SlideTag'
+import { Heading } from './Heading'
 
 export function Image({ slide }: { slide: ImageSlide }) {
   return (
-    <div className="slide-enter flex w-full max-w-4xl flex-col items-center gap-6">
-      <h2 className="self-start text-4xl font-bold tracking-tight">{slide.title}</h2>
+    <div className="slide-enter mx-auto flex w-full max-w-4xl flex-col items-center gap-phi-2xl">
+      <header className="flex flex-col items-center gap-phi-sm">
+        <SlideTag tag={slide.tag} />
+        <Heading level={3} className="text-center">{slide.title}</Heading>
+      </header>
       <img
         src={slide.src}
         alt={slide.title}
