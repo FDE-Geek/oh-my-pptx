@@ -134,6 +134,12 @@ try {
   process.exit(1)
 }
 
+// 默认署名（用户未在主题里指定时）
+const DEFAULT_AUTHOR = 'Abel-数字牧民'
+if (!deck.author || deck.author === 'abel' || deck.author === 'Abel') {
+  deck.author = DEFAULT_AUTHOR
+}
+
 // ── 质量闸 ───────────────────────────────────────────────────
 if (!noLint) {
   const issues = lintBasic(deck)

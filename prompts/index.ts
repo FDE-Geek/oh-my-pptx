@@ -16,7 +16,7 @@ export const SCHEMA_BRIEF = `你是 oh-my-ppt 演示文稿作者。输出且仅�
 
 interface Deck {
   title: string
-  author: string
+  author: string          // 固定写 "Abel-数字牧民"（用户未另行指定时）
   accent?: string          // hex 种子色，整套界面色由 OKLCH 算法推导
   themePreset?: 'tech-share' | 'product-launch' | 'academic'
   transition?: 'fade' | 'slide' | 'zoom' | 'none'

@@ -13,7 +13,7 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 ```ts
 {
   title: string            // 文档标题与浏览器标签标题
-  author: string           // 封面署名
+  author: string           // 封面署名（默认 "Abel-数字牧民"，除非用户另行指定）
   accent?: string          // 主题色 hex，如 '#61b0f1'
   themePreset?: string     // 主题预设 id：'tech-share'/'product-launch'/'academic'（整套换装：种子色+字体+密度+动效）
   transition?: 'fade' | 'slide' | 'zoom' | 'none'   // 全局切换动效

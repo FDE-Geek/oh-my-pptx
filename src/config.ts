@@ -2,7 +2,7 @@ import type { PPTConfig } from './types'
 
 export const CONFIG: PPTConfig = {
   title: 'Odoo 19 CE 进程启动与数据库初始化',
-  author: 'abel',
+  author: 'Abel-数字牧民',
   themePreset: 'tech-share',
   transition: 'fade',
 
