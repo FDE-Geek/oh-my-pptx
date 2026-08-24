@@ -10,7 +10,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 const inputClass =
-  'rounded-md border border-outline bg-bg px-phi-sm py-phi-xs text-sm text-fg outline-none transition-colors focus:border-accent'
+  'rounded-md border border-[var(--chrome-outline)] bg-[var(--chrome-bg)] px-phi-sm py-phi-xs text-sm text-[var(--chrome-fg)] outline-none transition-colors focus:border-accent'
 
 export function TextInput({
   value,

@@ -108,7 +108,7 @@ export function DiagramCanvas({
   return (
     <div
       ref={shellRef}
-      className={`flex h-full flex-col gap-phi-sm bg-bg ${
+      className={`flex h-full flex-col gap-phi-sm bg-[var(--chrome-bg)] ${
         fullscreen ? 'p-phi-lg' : 'min-h-[420px]'
       }`}
     >
@@ -157,7 +157,7 @@ export function DiagramCanvas({
 
       <div className="flex min-h-0 flex-1 gap-phi-sm">
         <div
-          className={`min-h-[380px] flex-1 overflow-hidden rounded-lg border border-outline bg-bg ${
+          className={`min-h-[380px] flex-1 overflow-hidden rounded-lg border border-[var(--chrome-outline)] bg-[var(--chrome-bg)] ${
             fullscreen ? 'min-h-0' : ''
           }`}
         >
@@ -165,7 +165,7 @@ export function DiagramCanvas({
         </div>
 
         {selectedNode && (
-          <div className="thin-scroll w-52 shrink-0 overflow-y-auto rounded-lg border border-outline bg-card p-phi-sm">
+          <div className="thin-scroll w-52 shrink-0 overflow-y-auto rounded-lg border border-[var(--chrome-outline)] bg-[var(--chrome-card)] p-phi-sm">
             <p className="mb-phi-sm text-xs font-semibold text-accent">节点属性</p>
             <label className="mb-phi-sm flex flex-col gap-phi-xs text-xs text-sfg">
               文字
@@ -180,7 +180,7 @@ export function DiagramCanvas({
                     ),
                   })
                 }
-                className="rounded-md border border-outline bg-bg px-phi-xs py-phi-xs text-sm text-fg outline-none focus:border-accent"
+                className="rounded-md border border-[var(--chrome-outline)] bg-[var(--chrome-bg)] px-phi-xs py-phi-xs text-sm text-[var(--chrome-fg)] outline-none focus:border-accent"
               />
             </label>
             <label className="mb-phi-sm flex flex-col gap-phi-xs text-xs text-sfg">
@@ -199,7 +199,7 @@ export function DiagramCanvas({
                     ),
                   })
                 }
-                className="rounded-md border border-outline bg-bg px-phi-xs py-phi-xs text-sm text-fg outline-none focus:border-accent"
+                className="rounded-md border border-[var(--chrome-outline)] bg-[var(--chrome-bg)] px-phi-xs py-phi-xs text-sm text-[var(--chrome-fg)] outline-none focus:border-accent"
               />
             </label>
             <label className="flex flex-col gap-phi-xs text-xs text-sfg">
@@ -219,7 +219,7 @@ export function DiagramCanvas({
                     ),
                   })
                 }
-                className="rounded-md border border-outline bg-bg px-phi-xs py-phi-xs text-sm text-fg outline-none focus:border-accent"
+                className="rounded-md border border-[var(--chrome-outline)] bg-[var(--chrome-bg)] px-phi-xs py-phi-xs text-sm text-[var(--chrome-fg)] outline-none focus:border-accent"
               >
                 <option value="rect">矩形</option>
                 <option value="ellipse">椭圆</option>

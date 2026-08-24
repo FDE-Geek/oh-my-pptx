@@ -110,9 +110,9 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
 
   return (
     <DeckContext.Provider value={doc}>
-      <div className="flex h-full w-full flex-col bg-bg text-fg">
+      <div className="flex h-full w-full flex-col bg-[var(--chrome-bg)] text-[var(--chrome-fg)]">
       {/* 顶栏 */}
-      <header className="flex items-center gap-phi-md border-b border-outline bg-card px-phi-md py-phi-sm">
+      <header className="flex items-center gap-phi-md border-b border-[var(--chrome-outline)] bg-[var(--chrome-card)] px-phi-md py-phi-sm">
         <button
           onClick={exit}
           className="flex items-center gap-phi-xs rounded-md px-phi-sm py-phi-xs text-sm text-sfg hover:text-accent"
@@ -278,7 +278,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
         <ResizeHandle dragging={form.dragging} onPointerDown={form.onPointerDown} />
 
         {/* 右侧实时预览 */}
-        <section className="flex min-w-0 flex-1 items-center justify-center overflow-hidden bg-bg p-phi-md">
+        <section className="flex min-w-0 flex-1 items-center justify-center overflow-hidden bg-[var(--chrome-bg)] p-phi-md">
           <div className="pointer-events-none flex max-h-full w-full max-w-[640px] items-center justify-center overflow-hidden rounded-lg border border-outline bg-card">
             <div className="pointer-events-none origin-center scale-[0.35]">
               <div className="flex h-[540px] w-[960px] items-center px-phi-3xl">
@@ -296,7 +296,7 @@ export function EditorShell({ onExit }: { onExit: (doc: PPTConfig) => void }) {
           onClick={() => setAddOpen(false)}
         >
           <div
-            className="grid w-[480px] grid-cols-2 gap-phi-sm rounded-xl bg-card p-phi-md shadow-2xl"
+            className="grid w-[480px] grid-cols-2 gap-phi-sm rounded-xl bg-[var(--chrome-card)] p-phi-md shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <p className="col-span-2 px-phi-xs pb-phi-xs text-xs font-semibold tracking-widest text-sfg uppercase">
@@ -363,7 +363,7 @@ function DeckMetaForm({
             type="color"
             value={accent}
             onChange={e => onPickAccent(e.target.value)}
-            className="h-9 w-14 cursor-pointer rounded-md border border-outline bg-bg"
+            className="h-9 w-14 cursor-pointer rounded-md border border-[var(--chrome-outline)] bg-[var(--chrome-bg)]"
           />
           <div className="flex flex-wrap gap-phi-xs">
             {ACCENTS.map((option: { name: string; seed: string }) => (

@@ -30,7 +30,7 @@ export function ThumbRail({
 
   return (
     <aside
-      className="flex h-full shrink-0 flex-col border-r border-outline bg-card"
+      className="flex h-full shrink-0 flex-col border-r border-[var(--chrome-outline)] bg-[var(--chrome-card)]"
       style={{ width }}
     >
       <div className="flex items-center justify-between px-phi-md py-phi-sm">
@@ -66,7 +66,7 @@ export function ThumbRail({
             }}
             className={`group relative flex cursor-pointer items-center gap-phi-xs rounded-lg border p-phi-xs transition-colors ${
               index === selected
-                ? 'border-accent bg-bg'
+                ? 'border-accent bg-[var(--chrome-bg)]'
                 : dropIndex === index && dragIndex !== null
                   ? 'border-accent-dim bg-accent/10'
                   : 'border-transparent hover:border-outline'

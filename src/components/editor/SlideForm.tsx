@@ -296,7 +296,7 @@ function ColumnEditor({
   onChange: (column: ColumnContent) => void
 }) {
   return (
-    <div className="rounded-lg border border-outline p-phi-sm">
+    <div className="rounded-lg border border-[var(--chrome-outline)] p-phi-sm bg-[var(--chrome-card)]">
       <p className="mb-phi-sm text-xs font-semibold text-accent">{label}</p>
       <div className="flex flex-col gap-phi-sm">
         <Field label="列标题">
@@ -359,7 +359,7 @@ function ChartEditor({
   onChange: (chart: ChartSpec) => void
 }) {
   return (
-    <div className="flex flex-col gap-phi-sm rounded-lg border border-outline p-phi-sm">
+    <div className="flex flex-col gap-phi-sm rounded-lg border border-[var(--chrome-outline)] p-phi-sm bg-[var(--chrome-card)]">
       <Field label="图表类型">
         <Select
           value={chart.kind}
