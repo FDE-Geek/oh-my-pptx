@@ -30,13 +30,17 @@ const htmlPath = join(outDir, 'index.html')
 let html = readFileSync(htmlPath, 'utf8')
 
 // 3. 注入明文 JSON 块（防 </script> 截断：转义 <）
+//    必须锚定最后一次出现的 </head>：内联 JS（如 hyperframes 模板串）
+//    也含 "</head>" 字面量，replace 的首个匹配会把数据块注进 JS 中间撕裂脚本。
 const json = JSON.stringify(CONFIG).replace(/</g, '\\u003c')
 const block = `<script type="application/json" id="oh-my-ppt-doc">${json}</script>`
-if (html.includes('</head>')) {
-  html = html.replace('</head>', `${block}\n</head>`)
-} else {
-  html = html.replace('<body>', `<head>${block}</head><body>`)
+const headClose = html.lastIndexOf('</head>')
+if (headClose === -1 || headClose < html.lastIndexOf('</style>')) {
+  // 异常兜底：找不到合法 head 闭合点则直接终止
+  console.error('✗ 未找到可注入的 </head>（产物结构异常）')
+  process.exit(1)
 }
+html = html.slice(0, headClose) + block + '\n' + html.slice(headClose)
 writeFileSync(outFile, html)
 
 // 4. 校验
