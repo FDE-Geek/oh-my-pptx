@@ -82,6 +82,7 @@
 
 ## 待验证清单（拿到好环境后）
 
+- [ ] `npm run tts`：Edge TTS 真实合成（本机到 speech.platform.bing.com WSS 不通，CLI 链路/错误归因/引用片段生成已验证；网络通了直接重跑）
 - [ ] `npx hyperframes render`：composition.html → MP4（网络 + ffmpeg + chromium）
 - [ ] `node scripts/render-video.mjs`：截图合成版（chromium + ffmpeg）
 - [ ] `npm run generate -- "主题"`：真实 Ollama 生成（`ollama pull qwen3:8b`）

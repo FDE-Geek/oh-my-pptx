@@ -103,6 +103,7 @@ npm run dev     # 打开 http://localhost:5173 翻一遍全部页面
 - **质量闸**：`src/utils/lint.ts`——图表数据对齐、diagram 边引用、表格列数、bullets 超长、章节节奏等结构性检查；agent 生成 deck 后应心算过一遍同规则
 - **skill**：`skills/oh-my-ppt/SKILL.md`——Claude Code 安装后按工作流生成
 - **MP4 成片**：`node scripts/export-hyperframes.mjs` 或编辑器「MP4」按钮 → HyperFrames composition（每页 iframe clip + GSAP timelines）；与单文件 deck 同目录后 `npx hyperframes render` 出确定性 MP4
+- **TTS 预生成**：`npm run tts`（`src/tts/` Provider 抽象：system/edge 可扩展云端）——Edge neural 音色（`--voice zh-CN-XiaoxiaoNeural` 等 8 个内置）逐页生成 MP3 到 `assets/narration/`，并在 `narration-refs.txt` 输出各页 `narrationAudio` 引用片段；放映/录制自动优先用音频文件（AudioMixer 混入录制音轨）
 
 ## 单文件分发（dist-single）
 

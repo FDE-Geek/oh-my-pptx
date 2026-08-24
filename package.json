@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "build:single": "vite build --config vite.config.single.ts && node scripts/build-single.mjs",
     "generate": "node scripts/generate.mjs",
+    "tts": "node scripts/tts.mjs",
     "test": "vitest run",
     "preview": "vite preview"
   },
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/dagre": "^0.7.54",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
