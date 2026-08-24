@@ -44,12 +44,13 @@
 
 ## 🚀 快速开始
 
+**30 秒体验**：`npm run dev` 后把 `src/config.ts` 换成导览 deck——
+
 ```sh
-npm install
-npm run dev        # http://localhost:5173
+cp src/examples/tour.ts src/config.ts   # 用 oh-my-ppt 讲 oh-my-ppt（功能自证明导览）
 ```
 
-改内容 = 改 `src/config.ts`（热更新即时预览）。
+或直接开始你自己的 deck：改 `src/config.ts`（热更新即时预览）。
 
 ```ts
 slides: [

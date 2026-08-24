@@ -156,6 +156,12 @@ export interface ThemeConfig {
   changeByHour: boolean
   hourDarkActive: string
   hourDarkInactive: string
+  /**
+   * 深色模式是否反转幻灯片舞台（缺省 false）。
+   * 借鉴 bento「THE DOCUMENT DOES NOT INVERT」：深色只暗 UI chrome，
+   * 舞台保持作者所见——校对者半夜也要看到纸是白的。
+   */
+  invertSlides?: boolean
 }
 
 /** 可丢入 themes/ 目录的主题预设（对应 OpenDesign 的设计系统包）。 */

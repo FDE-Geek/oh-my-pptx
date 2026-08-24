@@ -2,6 +2,7 @@ import { CONFIG as builtin } from './config'
 import type { PPTConfig } from './types'
 import { parseDesignMd, type ThemePreset } from './theme/presets'
 import { diffDecks, formatDiff } from './utils/diff'
+import { lintDeck, formatIssues } from './utils/lint'
 
 const PREVIEW_KEY = 'oh-my-ppt:preview-doc'
 export { PREVIEW_KEY }
@@ -15,6 +16,8 @@ declare global {
       getDoc: () => string
       importDesignMd: (markdown: string) => ThemePreset | null
       diffDocs: (baseJson: string, otherJson: string) => string
+      validate: (json?: string) => string
+      validateReport: (json?: string) => string
     }
   }
 }
@@ -122,6 +125,24 @@ window.ohMyPpt = {
       return formatDiff(diffDecks(base, other))
     } catch {
       return '解析失败：入参需为两份合法 deck JSON 字符串'
+    }
+  },
+  /** 结构化校验（借鉴 bento：静默错误显性化；只读，advice not refusal）。 */
+  validate: (json?: string) => {
+    try {
+      const doc = (json ? JSON.parse(json) : JSON.parse(getDocJson())) as PPTConfig
+      return JSON.stringify(lintDeck(doc), null, 2)
+    } catch (e) {
+      return JSON.stringify([{ page: 0, level: 'error', code: 'invalid-json', message: e instanceof Error ? e.message : 'JSON 解析失败' }])
+    }
+  },
+  /** 校验的可读文本版。 */
+  validateReport: (json?: string) => {
+    try {
+      const doc = (json ? JSON.parse(json) : JSON.parse(getDocJson())) as PPTConfig
+      return formatIssues(lintDeck(doc))
+    } catch (e) {
+      return '解析失败：' + (e instanceof Error ? e.message : '')
     }
   },
 }

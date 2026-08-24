@@ -1,0 +1,153 @@
+import type { PPTConfig } from '../types'
+
+/**
+ * 官方导览 deck——「每个宣称的功能由该功能本身证明」（借鉴 bento starter deck）。
+ * README / 新用户入口引用；用 oh-my-ppt 演示 oh-my-ppt。
+ */
+export const TOUR: PPTConfig = {
+  title: 'oh-my-ppt 导览',
+  author: 'oh-my-ppt',
+  themePreset: 'default',
+  transition: 'fade',
+
+  theme: {
+    autoChange: true,
+    changeByOS: true,
+    changeByHour: false,
+    hourDarkActive: '18:30',
+    hourDarkInactive: '07:00',
+  },
+
+  narration: {
+    enabled: false,
+    lang: 'zh-CN',
+    rate: 1,
+  },
+
+  autoplay: {
+    enabled: true,
+    defaultDuration: 2500,
+  },
+
+  slides: [
+    {
+      type: 'cover',
+      title: 'oh-my-ppt',
+      subtitle: '一份 HTML 文件，就是一场演示 · 这是用本工具做的自我导览',
+      tag: 'v1.0',
+      narration: '',
+    },
+    {
+      type: 'section',
+      title: '这份导览本身就是证明',
+      items: [
+        { title: '11 种页型', summary: '本导览全部用到' },
+        { title: '算法主题', summary: 'OKLCH 种子色推导' },
+        { title: '零依赖图表', summary: 'SVG 手绘' },
+        { title: 'X6 图示', summary: 'dagre 自动布局' },
+        { title: '从想法到视频', summary: 'TTS · 录制 · HyperFrames' },
+      ],
+    },
+    {
+      type: 'content',
+      tag: '核心主张',
+      title: '文件即软件',
+      step: true,
+      bullets: [
+        '改 PPT = 改一个 config.ts',
+        '构建产物是单个 HTML 文件',
+        '放映 · 编辑 · 录屏全部内含',
+        '无服务器 · 无安装 · 无锁定',
+      ],
+      narration: '',
+    },
+    {
+      type: 'two-column',
+      title: '两种用法',
+      left: {
+        title: '写给作者',
+        bullets: ['config 驱动 + git 管版本', 'AI 生成（CLI / skill / prompt 库）', '编辑器可视化微调'],
+      },
+      right: {
+        title: '写给观众',
+        bullets: ['双击 HTML 即可放映', '键盘导航 + 概览 + 演讲者视图', '右键菜单换主题'],
+      },
+    },
+    {
+      type: 'chart',
+      tag: '零依赖图表',
+      title: '单文件体积演进（KB）',
+      chart: {
+        kind: 'bar',
+        labels: ['v0.4', 'v0.5', 'v0.6', 'v0.7', 'v1.0'],
+        series: [{ name: '产物体积', data: [276, 278, 279, 935, 958] }],
+      },
+    },
+    {
+      type: 'diagram',
+      tag: 'X6 图示 · dagre',
+      title: '从想法到视频',
+      diagram: {
+        layout: 'dagre',
+        layoutDir: 'LR',
+        nodes: [
+          { id: 'idea', x: 0, y: 0, label: '想法', fill: '#61b0f1' },
+          { id: 'gen', x: 0, y: 0, label: 'AI 生成 config' },
+          { id: 'need', x: 0, y: 0, label: '需要人工把关？', shape: 'diamond' },
+          { id: 'edit', x: 0, y: 0, label: '编辑器微调', shape: 'double-rect' },
+          { id: 'deck', x: 0, y: 0, label: '单文件 deck' },
+          { id: 'video', x: 0, y: 0, label: 'MP4 成片', fill: '#2e8a7a' },
+        ],
+        edges: [
+          { source: 'idea', target: 'gen' },
+          { source: 'gen', target: 'need' },
+          { source: 'need', target: 'edit', label: '是' },
+          { source: 'edit', target: 'deck' },
+          { source: 'need', target: 'deck', label: '否' },
+          { source: 'deck', target: 'video', label: 'HyperFrames' },
+        ],
+      },
+    },
+    {
+      type: 'code',
+      tag: 'config 驱动',
+      title: '一页 PPT 就是一个对象',
+      filename: 'config.ts',
+      language: 'ts',
+      code: `{
+  type: 'content',
+  title: '文件即软件',
+  step: true,          // ← 逐条出现（放映时按空格试试）
+  bullets: ['改 config 即改 PPT', '产物是单个 HTML'],
+  narration: '口播稿写这里，TTS 自动朗读',
+}`,
+    },
+    {
+      type: 'table',
+      tag: '放映操作',
+      title: '快捷键速查',
+      headers: ['键', '功能'],
+      rows: [
+        ['→ / 空格', '下一页（step 页先逐条）'],
+        ['G / S / E', '概览 / 演讲者视图 / 编辑器'],
+        ['F / P', '全屏 / 打印导出 PDF'],
+        ['右键', '上下文菜单（主题/放映/录制）'],
+      ],
+    },
+    {
+      type: 'quote',
+      quote: 'Talk is cheap. Show me the deck.',
+      author: '把这句话放进 config，双击 HTML 就能放映',
+    },
+    {
+      type: 'end',
+      title: '现在轮到你了',
+      subtitle: 'npm run dev 开始你的第一份 deck',
+      takeaways: [
+        '右键菜单可以换主题种子色（本页实时变色）',
+        'E 进编辑器改造这份导览',
+        '导出 HTML 分享给任何人——零依赖',
+      ],
+    },
+  ],
+}

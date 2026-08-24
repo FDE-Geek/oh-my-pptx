@@ -59,7 +59,7 @@ export function ContextMenu({ items }: { items: MenuItem[] }) {
   return (
     <div
       ref={menuRef}
-      className={`no-print fixed z-50 w-60 overflow-hidden rounded-xl border border-outline bg-card py-phi-sm shadow-2xl ${
+      className={`no-print fixed z-50 w-60 overflow-hidden rounded-xl border border-[var(--chrome-outline)] bg-[var(--chrome-card)] py-phi-sm shadow-2xl ${
         pos ? '' : 'invisible'
       }`}
       style={

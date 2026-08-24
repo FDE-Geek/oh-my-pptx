@@ -36,7 +36,12 @@ export interface DeckThemeSource {
 }
 
 /** 应用主题预设（字体/密度），种子色由 preset 或 config 提供。 */
-export function applyDeckTheme(accentHex: string, dark: boolean, preset?: ThemePreset) {
+export function applyDeckTheme(
+  accentHex: string,
+  dark: boolean,
+  preset?: ThemePreset,
+  invertSlides = false,
+) {
   const root = document.documentElement
   const family = deriveAccentFamily(accentHex)
   root.style.setProperty('--accent', family.accent)
@@ -46,13 +51,16 @@ export function applyDeckTheme(accentHex: string, dark: boolean, preset?: ThemeP
   root.style.setProperty('--danger', DANGER)
   root.style.setProperty('--on-danger', contrastOn(DANGER))
 
-  const canvas = deriveCanvas(accentHex, dark)
+  // 「THE DOCUMENT DOES NOT INVERT」（借鉴 bento）：深色只暗 UI chrome；
+  // 舞台/卡片保持浅色纸面，除非文档显式声明 invertSlides。
+  // 实现：舞台色不再参与 dark 反转，root 上的 dark 只影响 UI 控件类。
+  const canvas = deriveCanvas(accentHex, dark && invertSlides)
   for (const [key, value] of Object.entries(canvas)) {
     root.style.setProperty(key, value)
   }
 
-  // 文字色跟随明暗（亮色近墨、暗色近纸）
-  root.style.setProperty('--fg', dark ? '#dcdde3' : '#33353a')
+  // 文字色跟随明暗（亮色近墨、暗色近纸；不反转时舞台文字保持墨色）
+  root.style.setProperty('--fg', dark && invertSlides ? '#dcdde3' : '#33353a')
 
   // 预设：字体族 + 密度倍率
   root.style.setProperty('--font-body', preset?.fontFamily ?? '')
@@ -93,8 +101,13 @@ export function useTheme(config: DeckThemeSource) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
-    applyDeckTheme(accent, dark, preset)
-  }, [dark, accent, preset])
+    // 不反转舞台时标记，chrome 变量组接管 UI 控件配色
+    document.documentElement.toggleAttribute(
+      'data-invert-slides',
+      config.theme.invertSlides === true,
+    )
+    applyDeckTheme(accent, dark, preset, config.theme.invertSlides === true)
+  }, [dark, accent, preset, config.theme.invertSlides])
 
   const pickAccent = useCallback((seed: string) => {
     setAccentOverride(seed)

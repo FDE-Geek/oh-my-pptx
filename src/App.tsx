@@ -301,7 +301,7 @@ export default function App() {
         </main>
         {!embed && (
           <>
-            <span className="no-print absolute bottom-lg left-lg text-sm text-sfg tabular-nums">
+            <span className="no-print absolute bottom-lg left-lg text-sm text-[var(--chrome-sfg)] tabular-nums">
               {current + 1} / {total}
             </span>
             <div className="no-print">

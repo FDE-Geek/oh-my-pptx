@@ -88,6 +88,26 @@ h3 {
   --sfg: #8d8f97;
 }
 
+/*
+ * UI chrome 变量（独立于舞台）：深色模式暗 chrome、亮纸面
+ *（bento「THE DOCUMENT DOES NOT INVERT」）。不反转舞台时，
+ * 控件（右键菜单/翻页钮/进度条/编辑器 chrome）用这组。
+ */
+:root {
+  --chrome-bg: var(--bg);
+  --chrome-card: var(--card);
+  --chrome-fg: var(--fg);
+  --chrome-sfg: var(--sfg);
+  --chrome-outline: var(--outline);
+}
+html.dark:not([data-invert-slides]) {
+  --chrome-bg: #15181d;
+  --chrome-card: #232733;
+  --chrome-fg: #dcdde3;
+  --chrome-sfg: #8d8f97;
+  --chrome-outline: #3a3742;
+}
+
 @keyframes slide-in {
   from {
     opacity: 0;
