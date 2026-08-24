@@ -60,5 +60,5 @@ const composition = toHyperframesComposition(doc, { singleFileName: deckName })
 
 writeFileSync(outFile, composition)
 console.log(`✓ ${outFile}（${doc.slides.length} 页，HyperFrames composition）`)
-console.log(`  使用：把 ${outFile} 与 ${deckName} 放同一目录，然后`)
-console.log(`    npx hyperframes init hf-project && cp ${outFile} ${deckName} hf-project/ && cd hf-project && npx hyperframes render`)
+console.log(`  浏览器预览（无需 CLI）：${outFile} 与 ${deckName} 同目录，打开 ${outFile}?preview`)
+console.log(`  确定性渲染：npx hyperframes init hf-project && cp ${outFile} ${deckName} hf-project/ && cd hf-project && npx hyperframes render`)

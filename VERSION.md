@@ -31,6 +31,7 @@
 - [x] **composition 导出器**：`src/utils/hyperframes.ts`——deck → HyperFrames HTML composition：每页 iframe clip（`?embed=1&frame=1&start=N` 单页锁定）+ `data-start/duration` 时间轴（时长按旁白字数×语速近似推导）+ GSAP seekable timelines（step/animation 逐条入场）
 - [x] **frame 锁定模式**：`?frame=1` 单页渲染、禁键盘禁自动逻辑——供逐帧 seek
 - [x] **导出入口**：编辑器「MP4」按钮 / `node scripts/export-hyperframes.mjs`；产物 + 单文件 deck 同目录放 `npx hyperframes render` 即得确定性 MP4（自动获得 GSAP/音频/Lambda 分布式渲染全部能力）
+- [x] **纯浏览器预览**：`composition.html?preview` 内嵌播放器——播放/暂停/重置/拖动进度条，逐页时间轴节奏零依赖可见（file:// 可开）；frame 模式支持页面内 animation 时序自动播放
 
 ### v0.5 —— 模板与品牌（对标 OpenDesign 的 DESIGN.md / 模板体系）✅
 

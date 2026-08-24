@@ -40,6 +40,9 @@ export default function App() {
   currentRef.current = current
   const gotoRef = useRef(goto)
   gotoRef.current = goto
+  const forceStepRef = useRef(forceStep)
+  forceStepRef.current = forceStep
+  const frame = embedRef.current.frame
   const recorderRef = useRef<ReturnType<typeof createRecorder> | null>(null)
   const recordingActiveRef = useRef(false)
 
@@ -128,14 +131,24 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [mode, cancel, openSpeaker, editing, enterEditor])
 
-  // 嵌入模式：frame=1 单页锁定（HyperFrames 逐页 iframe）；autoplay 定时翻页 + 循环
+  // 嵌入模式：frame=1 单页锁定（HyperFrames 逐页 iframe），页面内 animation 时序自动播放
   useEffect(() => {
-    if (!embed || editing) return
-    const { autoplay, loop, start, frame } = embedRef.current
-    if (frame) {
-      goto(start - 1)
-      return
-    }
+    if (!embed || !frame || editing) return
+    const { start } = embedRef.current
+    goto(start - 1)
+    const slide = DECK.slides[start - 1]
+    if (!slide?.animation?.length) return
+    const timers = slide.animation.map((item, i) =>
+      window.setTimeout(() => forceStepRef.current(item.index ?? i), item.at),
+    )
+    return () => timers.forEach(t => window.clearTimeout(t))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embed, frame, editing, DECK.slides])
+
+  // 嵌入模式（非 frame）：autoplay 定时翻页 + 循环
+  useEffect(() => {
+    if (!embed || frame || editing) return
+    const { autoplay, loop, start } = embedRef.current
     if (!autoplay) return
     goto(start - 1)
     let stopped = false
@@ -158,7 +171,7 @@ export default function App() {
       window.clearInterval(timer)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embed, editing, total, DECK.autoplay.defaultDuration])
+  }, [embed, frame, editing, total, DECK.autoplay.defaultDuration])
 
   const handleStart = useCallback(
     async (record: boolean) => {
