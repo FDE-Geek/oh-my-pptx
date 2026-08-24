@@ -2,8 +2,8 @@
  * build-single 后处理：把 deck JSON 注入为明文数据块，产出自包含单文件。
  * 契约：#oh-my-ppt-doc 块必须是明文 JSON、可正则提取、`<` 转义为 \u003c。
  */
-import { readFileSync, writeFileSync, mkdirSync, symlinkSync, existsSync } from 'node:fs'
-import { resolve, join, relative } from 'node:path'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { resolve, join } from 'node:path'
 import { build } from 'esbuild'
 
 const root = resolve(process.cwd())
@@ -66,14 +66,14 @@ for (const [name, pass] of checks) {
 const size = (final.length / 1024).toFixed(0)
 console.log(`→ ${outFile} (${size} KB, ${CONFIG.slides.length} slides)`)
 
-// 5. 刷新 public/shell.html 软链（编辑器「导出 HTML」运行时 fetch 的壳）
-const shellLink = join(root, 'public/shell.html')
+// 5. 刷新 public/shell.html（编辑器「导出 HTML」运行时 fetch 的壳）。
+// 必须是真文件拷贝而非软链：vite dev 会把软链目标当源 HTML 转换
+//（注入 react-refresh），破坏数据块。
+const shellPath = join(root, 'public/shell.html')
 try {
-  if (!existsSync(shellLink)) {
-    symlinkSync(outFile, shellLink)
-    console.log(`→ linked public/shell.html → ${relative(root, outFile)}（编辑器导出壳）`)
-  }
+  writeFileSync(shellPath, final)
+  console.log(`→ 拷贝 public/shell.html（${(final.length / 1024).toFixed(0)} KB，编辑器导出壳）`)
 } catch {
-  /* 软链失败（如 Windows 无权限）不阻塞构建 */
+  /* 拷贝失败不阻塞构建 */
 }
 process.exitCode = ok ? 0 : 1
