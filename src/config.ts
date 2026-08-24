@@ -130,6 +130,31 @@ export const CONFIG: PPTConfig = {
         ['image / table / chart', '多媒体与数据', 'src / rows / chart'],
       ],
     },
+    {
+      type: 'diagram',
+      title: '图示：想法到成片',
+      diagram: {
+        layout: 'dagre',
+        layoutDir: 'LR',
+        nodes: [
+          { id: 'idea', x: 0, y: 0, label: '一个想法', fill: '#61b0f1' },
+          { id: 'config', x: 0, y: 0, label: 'config.ts' },
+          { id: 'ai', x: 0, y: 0, label: '需要 AI 修改吗？', shape: 'diamond' },
+          { id: 'human', x: 0, y: 0, label: '编辑器人工把关', shape: 'double-rect' },
+          { id: 'deck', x: 0, y: 0, label: '演示文稿' },
+          { id: 'video', x: 0, y: 0, label: 'webm 视频' },
+        ],
+        edges: [
+          { source: 'idea', target: 'config' },
+          { source: 'config', target: 'ai' },
+          { source: 'ai', target: 'human', label: '是' },
+          { source: 'human', target: 'config', dashed: true },
+          { source: 'ai', target: 'deck', label: '否' },
+          { source: 'deck', target: 'video' },
+        ],
+      },
+      notes: 'X6 图：dagre 自动布局（LR），菱形判断 + 双框过程 + 回环边。',
+    },
     { type: 'section', title: '开始使用' },
     {
       type: 'content',

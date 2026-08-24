@@ -36,6 +36,7 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 | `image` | `title, src` | `caption` |
 | `table` | `title, headers, rows` | — |
 | `chart` | `title, chart` | `chart: { kind, labels, series }`，kind 为 `bar/line/pie` |
+| `diagram` | `title, diagram` | `diagram: { nodes, edges }`，X6 图示（详见下） |
 | `end` | `title` | `subtitle` |
 
 所有页型共有可选字段：
@@ -44,6 +45,32 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 - `narration` — TTS 旁白文本；缺省时由 title/bullets 自动拼接
 - `duration` — 自动放映停留毫秒（无旁白页生效）
 - `transition` — 覆盖全局切换动效
+
+## diagram 页型（X6 图示）
+
+```ts
+{
+  type: 'diagram',
+  title: '流程',
+  diagram: {
+    layout: 'dagre',        // 可选：声明后 x/y 可全写 0，放映时自动分层排列
+    layoutDir: 'LR',        // TB 上下（缺省）/ LR 左右
+    nodes: [
+      { id: 'a', x: 0, y: 0, label: '开始', fill: '#61b0f1', shape: 'ellipse' },
+      { id: 'b', x: 0, y: 0, label: '判断', shape: 'diamond' },   // 缺省 rect
+      { id: 'c', x: 0, y: 0, label: '过程', shape: 'double-rect' },
+    ],
+    edges: [
+      { source: 'a', target: 'b', label: '可选', dashed: true, arrow: false },
+    ],
+  },
+}
+```
+
+- 节点：`id/label` 必填；`fill`（hex，同时作为描边色，字色 OKLCH 自动对比）、`shape`（`rect` 缺省 / `ellipse` / `diamond` 菱形判断 / `double-rect` 双框过程）可选
+- 边：`source/target` 引用节点 id；`label/dashed/arrow`（缺省 true）/ `router`（`orth` 正交缺省 / `normal` 直线）可选
+- 布局：`layout: 'dagre'` 时坐标自动计算（编辑器「自动布局 ↕/↔」按钮等价）
+- 编辑模式选中该页时表单区变为 X6 画布：拖节点、从边缘拉连线、点选改属性（文字/填充/形状）
 
 ## 写作守则
 

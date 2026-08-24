@@ -9,6 +9,19 @@ import { Code } from './slides/Code'
 import { Image } from './slides/Image'
 import { Table } from './slides/Table'
 import { ChartSlideView } from './slides/Chart'
+import type { DiagramSlide } from '../types'
+import { DiagramView } from './slides/Diagram'
+
+function DiagramSlideView({ slide }: { slide: DiagramSlide }) {
+  return (
+    <div className="slide-enter flex h-[540px] w-full max-w-4xl flex-col items-start gap-phi-md">
+      <h2 className="text-4xl font-bold tracking-tight">{slide.title}</h2>
+      <div className="min-h-0 flex-1 w-full overflow-hidden rounded-xl border border-outline bg-card">
+        <DiagramView spec={slide.diagram} />
+      </div>
+    </div>
+  )
+}
 
 export function SlideRenderer({
   slide,
@@ -41,6 +54,8 @@ export function SlideRenderer({
         return <Table slide={slide} />
       case 'chart':
         return <ChartSlideView slide={slide} />
+      case 'diagram':
+        return <DiagramSlideView slide={slide} />
     }
   })()
 

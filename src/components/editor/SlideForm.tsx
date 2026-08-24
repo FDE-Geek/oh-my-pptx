@@ -9,8 +9,10 @@ import type {
   TableSlide,
   ChartSlide,
   ColumnContent,
+  DiagramSlide,
 } from '../../types'
 import { Field, TextInput, TextArea, Select, Toggle, ListEditor } from './Controls'
+import { DiagramCanvas } from './DiagramCanvas'
 
 const TRANSITION_OPTIONS = [
   { value: 'fade', label: '淡入（默认）' },
@@ -220,6 +222,20 @@ function SwitchByType({
             <TextInput value={chart.title} onChange={v => onChange({ title: v })} />
           </Field>
           <ChartEditor chart={chart.chart} onChange={next => onChange({ chart: next })} />
+        </>
+      )
+    }
+    case 'diagram': {
+      const diagram = slide as DiagramSlide
+      return (
+        <>
+          <Field label="标题">
+            <TextInput value={diagram.title} onChange={v => onChange({ title: v })} />
+          </Field>
+          <DiagramCanvas
+            spec={diagram.diagram}
+            onChange={next => onChange({ diagram: next })}
+          />
         </>
       )
     }

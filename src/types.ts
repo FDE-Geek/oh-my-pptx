@@ -88,6 +88,43 @@ export interface ChartSlide extends SlideBase {
   chart: ChartSpec
 }
 
+/** X6 图节点（简化 spec，独立于 X6 内部格式）。 */
+export interface DiagramNodeSpec {
+  id: string
+  x: number
+  y: number
+  width?: number
+  height?: number
+  label: string
+  shape?: 'rect' | 'ellipse' | 'diamond' | 'double-rect'
+  fill?: string
+}
+
+export interface DiagramEdgeSpec {
+  source: string
+  target: string
+  label?: string
+  dashed?: boolean
+  arrow?: boolean
+  /** 路由：normal 直线 / orth 正交拐线（缺省） */
+  router?: 'normal' | 'orth'
+}
+
+export interface DiagramSpec {
+  nodes: DiagramNodeSpec[]
+  edges: DiagramEdgeSpec[]
+  /** 自动布局：dagre（DAG 分层）/ 指定后 x/y 可省略自动计算 */
+  layout?: 'dagre'
+  /** dagre 布局方向：TB 上下 / LR 左右（缺省 TB） */
+  layoutDir?: 'TB' | 'LR'
+}
+
+export interface DiagramSlide extends SlideBase {
+  type: 'diagram'
+  title: string
+  diagram: DiagramSpec
+}
+
 export type Slide =
   | CoverSlide
   | SectionSlide
@@ -99,6 +136,7 @@ export type Slide =
   | ImageSlide
   | TableSlide
   | ChartSlide
+  | DiagramSlide
 
 export interface ThemeConfig {
   autoChange: boolean

@@ -44,6 +44,21 @@ const NEW_SLIDE: Record<string, () => Slide> = {
       series: [{ name: '系列一', data: [1, 2, 3] }],
     },
   }),
+  diagram: () => ({
+    type: 'diagram',
+    title: '图示页',
+    diagram: {
+      nodes: [
+        { id: 'a', x: 80, y: 60, label: '开始' },
+        { id: 'b', x: 280, y: 60, label: '处理' },
+        { id: 'c', x: 480, y: 60, label: '结束' },
+      ],
+      edges: [
+        { source: 'a', target: 'b' },
+        { source: 'b', target: 'c' },
+      ],
+    },
+  }),
   end: () => ({ type: 'end', title: 'Thanks' }),
 }
 

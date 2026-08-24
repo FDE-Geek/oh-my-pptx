@@ -7,8 +7,9 @@
 ## ✨ 特性
 
 ### 演示体验
-- **10 种页型**：cover / section / content / two-column / quote / code / image / table / chart / end
+- **11 种页型**：cover / section / content / two-column / quote / code / image / table / chart / diagram / end
 - **零依赖图表**：手写 SVG 的 bar / line / pie，自动刻度、悬浮数值、主题适配
+- **X6 图示页**：基于 AntV X6 的流程图/DAG 页型——config 存节点/边 JSON，编辑模式直接在画布上拖节点、拉连线、改属性
 - **轻量代码高亮**：自研 tokenizer（关键字/字符串/注释/数字/函数），支持 js/ts/py/bash
 - **逐条动画**：content 页 bullets 分步出现
 - **切换动效**：fade / slide / zoom，全局或单页覆盖
