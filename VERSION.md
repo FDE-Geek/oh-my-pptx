@@ -48,17 +48,17 @@
 
 ### v0.8 —— 协作与生态
 
-- [ ] **多 deck 工作区**：单文件内嵌多份演示 + 目录页（产品手册/课程套件场景）
-- [ ] **版本对比**：两个单文件的 JSON diff 视图（谁改了哪页）
-- [ ] **嵌入式播放**：`<iframe>` 嵌入任意站点的参数化播放（`?start=3&autoplay=1`）
-- [ ] **组件市场雏形**：`slides/recipes/`——社区贡献的页型模板（婚礼请柬/代码走查/复盘报告），config 引用
+- [x] **嵌入式播放**：`?embed=1&start=N&autoplay=1&loop=1` 参数化——隐藏全部 UI（菜单/翻页/进度条），自动翻页 + 末页循环，iframe 嵌任意站点（gotoRef 修复 useCallback 闭包过期导致的翻页错乱）
+- [x] **版本对比**：`window.ohMyPpt.diffDocs(baseJson, otherJson)`——页级增/删/改/移结构化 diff + 元信息变更，文本报告输出
+- [ ] **多 deck 工作区**：单文件内嵌多份演示 + 目录页（产品手册/课程套件场景）——**移入 v1.x**（数据模型需扩展，避免破坏 1.0 契约）
+- [ ] **组件市场雏形**：`slides/recipes/` 社区页型模板——**移入 v1.x**（依赖多 deck 的引用机制）
 
 ### v1.0 —— 稳定契约
 
-- [ ] **格式规范冻结**：`docs/format.md`——数据模型规范（对应 OpenDesign 的 normative spec），旧文件永久可开
-- [ ] **测试基线**：Vitest 单测（types/theme/diagram 纯函数）+ Playwright 冒烟（翻页/编辑/导出）
-- [ ] **无障碍**：键盘全流程、ARIA 标注、对比度审计（复用 contrastOn 已有算法）
-- [ ] **文档站**：单文件构建的官方文档站（用 oh-my-ppt 演示 oh-my-ppt）
+- [x] **格式规范冻结**：`docs/format.md`——normative 数据模型规范（11 页型/共有字段/diagram/splice 契约/稳定性规则），承诺向后兼容
+- [x] **测试基线**：Vitest 单测 20 项（lint 质量闸 / OKLCH 色彩科学 / 画布停点 / DESIGN.md 解析 / deck diff），`npm test`
+- [ ] **无障碍**：键盘全流程、ARIA 标注、对比度审计（复用 contrastOn 已有算法）——收尾中
+- [ ] **文档站**：单文件构建的官方文档站（用 oh-my-ppt 演示 oh-my-ppt）——收尾中
 
 ## 不做清单（Non-goals）
 

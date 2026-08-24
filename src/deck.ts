@@ -1,6 +1,7 @@
 import { CONFIG as builtin } from './config'
 import type { PPTConfig } from './types'
 import { parseDesignMd, type ThemePreset } from './theme/presets'
+import { diffDecks, formatDiff } from './utils/diff'
 
 const PREVIEW_KEY = 'oh-my-ppt:preview-doc'
 export { PREVIEW_KEY }
@@ -13,6 +14,7 @@ declare global {
       loadDoc: (json: string) => boolean
       getDoc: () => string
       importDesignMd: (markdown: string) => ThemePreset | null
+      diffDocs: (baseJson: string, otherJson: string) => string
     }
   }
 }
@@ -112,4 +114,14 @@ window.ohMyPpt = {
   getDoc: getDocJson,
   /** DESIGN.md（OpenDesign 9 节 schema 子集）→ ThemePreset；失败返回 null。 */
   importDesignMd: (markdown: string) => parseDesignMd(markdown) as ThemePreset | null,
+  /** 两份 deck JSON 的结构化对比（文本报告）。 */
+  diffDocs: (baseJson: string, otherJson: string) => {
+    try {
+      const base = JSON.parse(baseJson) as PPTConfig
+      const other = JSON.parse(otherJson) as PPTConfig
+      return formatDiff(diffDecks(base, other))
+    } catch {
+      return '解析失败：入参需为两份合法 deck JSON 字符串'
+    }
+  },
 }

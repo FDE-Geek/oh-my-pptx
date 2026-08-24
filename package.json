@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "build:single": "vite build --config vite.config.single.ts && node scripts/build-single.mjs",
     "generate": "node scripts/generate.mjs",
+    "test": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
-    "vite-plugin-singlefile": "^2.3.3"
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^4.1.11"
   }
 }

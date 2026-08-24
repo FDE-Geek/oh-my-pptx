@@ -14,9 +14,13 @@ import { ThemePanel } from './components/ThemePanel'
 import { EditorShell } from './components/editor/EditorShell'
 import { DeckContext } from './components/DeckContext'
 import { createRecorder, downloadBlob } from './utils/recorder'
+import { readEmbedParams } from './utils/embed'
 
 export default function App() {
+  const embedRef = useRef(readEmbedParams())
+  const { embed } = embedRef.current
   const [editing, setEditing] = useState(() => {
+    if (embedRef.current.embed) return false
     try {
       return sessionStorage.getItem('oh-my-ppt:editing') === '1'
     } catch {
@@ -32,6 +36,10 @@ export default function App() {
     !editing,
   )
   const total = DECK.slides.length
+  const currentRef = useRef(current)
+  currentRef.current = current
+  const gotoRef = useRef(goto)
+  gotoRef.current = goto
   const recorderRef = useRef<ReturnType<typeof createRecorder> | null>(null)
   const recordingActiveRef = useRef(false)
 
@@ -119,6 +127,34 @@ export default function App() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [mode, cancel, openSpeaker, editing, enterEditor])
+
+  // 嵌入模式：autoplay 定时翻页，末页 loop 回 start 或停止
+  useEffect(() => {
+    if (!embed || editing) return
+    const { autoplay, loop, start } = embedRef.current
+    if (!autoplay) return
+    goto(start - 1)
+    let stopped = false
+    const tick = () => {
+      if (stopped) return
+      const page = currentRef.current
+      if (page < total - 1) {
+        // 用 ref 读最新 goto（useCallback 闭包会过期，捕获首次渲染的 current）
+        gotoRef.current(page + 1)
+      } else if (loop) {
+        gotoRef.current(start - 1)
+      } else {
+        stopped = true
+        window.clearInterval(timer)
+      }
+    }
+    const timer = window.setInterval(tick, DECK.autoplay.defaultDuration)
+    return () => {
+      stopped = true
+      window.clearInterval(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embed, editing, total, DECK.autoplay.defaultDuration])
 
   const handleStart = useCallback(
     async (record: boolean) => {
@@ -220,17 +256,21 @@ export default function App() {
             step={step}
           />
         </main>
-        <span className="no-print absolute bottom-lg left-lg text-sm text-sfg tabular-nums">
-          {current + 1} / {total}
-        </span>
-        <div className="no-print">
-          <Controls onPrev={prev} onNext={next} />
-        </div>
-        <div className="no-print">
-          <ProgressBar current={current} total={total} />
-        </div>
+        {!embed && (
+          <>
+            <span className="no-print absolute bottom-lg left-lg text-sm text-sfg tabular-nums">
+              {current + 1} / {total}
+            </span>
+            <div className="no-print">
+              <Controls onPrev={prev} onNext={next} />
+            </div>
+            <div className="no-print">
+              <ProgressBar current={current} total={total} />
+            </div>
+          </>
+        )}
         {overview && <Overview slides={DECK.slides} current={current} onPick={goto} />}
-        <ContextMenu items={menuItems} />
+        {!embed && <ContextMenu items={menuItems} />}
       </div>
     </DeckContext.Provider>
   )
