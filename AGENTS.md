@@ -15,6 +15,7 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
   title: string            // 文档标题与浏览器标签标题
   author: string           // 封面署名
   accent?: string          // 主题色 hex，如 '#61b0f1'
+  themePreset?: string     // 主题预设 id：'tech-share'/'product-launch'/'academic'（整套换装：种子色+字体+密度+动效）
   transition?: 'fade' | 'slide' | 'zoom' | 'none'   // 全局切换动效
   theme: ThemeConfig       // 深浅色自动切换策略
   narration: NarrationConfig  // TTS 旁白（lang 如 'zh-CN'，rate 0.5–2）
@@ -23,13 +24,15 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 }
 ```
 
+主题预设优先级：会话选色 > themePreset > accent > 缺省。DESIGN.md（OpenDesign 9 节 schema 子集：Palette/Typography/Voice）可经 `window.ohMyPpt.importDesignMd(md)` 解析为预设。
+
 ## 页型速查（slides 数组元素）
 
 | type | 必填字段 | 可选字段 |
 |---|---|---|
 | `cover` | `title` | `subtitle` |
 | `section` | `title` | `subtitle` |
-| `content` | `title` | `bullets: string[]`、`step: true`（逐条出现） |
+| `content` | `title` | `bullets: string[]`、`step: true`（逐条出现）、`layout: 'center'/'card'`（版式） |
 | `two-column` | `title, left, right` | 每列 `{ title?, bullets? }` |
 | `quote` | `quote` | `author` |
 | `code` | `title, code` | `language`（js/ts/py/bash）、`filename` |

@@ -98,6 +98,19 @@ function SwitchByType({
             bullets={content.bullets ?? []}
             onChange={bullets => onChange({ bullets })}
           />
+          <Field label="版式">
+            <Select<'left' | 'center' | 'card'>
+              value={content.layout ?? 'left'}
+              options={[
+                { value: 'left', label: '左对齐（缺省）' },
+                { value: 'center', label: '居中' },
+                { value: 'card', label: '卡片网格' },
+              ]}
+              onChange={(v: 'left' | 'center' | 'card') =>
+                onChange({ layout: v === 'left' ? undefined : v })
+              }
+            />
+          </Field>
           <Toggle
             checked={content.step === true}
             onChange={v => onChange({ step: v || undefined })}

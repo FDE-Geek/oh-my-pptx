@@ -4,6 +4,7 @@ export const CONFIG: PPTConfig = {
   title: 'oh-my-ppt',
   author: 'abel',
   accent: '#61b0f1',
+  themePreset: 'default',
   transition: 'fade',
 
   theme: {
@@ -48,6 +49,7 @@ export const CONFIG: PPTConfig = {
       type: 'content',
       title: '功能一览',
       step: true,
+      layout: 'card',
       bullets: [
         '主题：深色 / 浅色手动切换，保存到 localStorage',
         '自动主题：跟随操作系统 或 按时段切换',

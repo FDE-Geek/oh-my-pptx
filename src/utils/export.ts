@@ -20,6 +20,7 @@ export function toConfigSource(doc: PPTConfig): string {
     `  author: ${JSON.stringify(doc.author)},`,
   ]
   if (doc.accent) meta.push(`  accent: ${JSON.stringify(doc.accent)},`)
+  if (doc.themePreset) meta.push(`  themePreset: ${JSON.stringify(doc.themePreset)},`)
   if (doc.transition) meta.push(`  transition: ${JSON.stringify(doc.transition)},`)
   return `import type { PPTConfig } from './types'
 

@@ -1,5 +1,6 @@
 import { CONFIG as builtin } from './config'
 import type { PPTConfig } from './types'
+import { parseDesignMd, type ThemePreset } from './theme/presets'
 
 const PREVIEW_KEY = 'oh-my-ppt:preview-doc'
 export { PREVIEW_KEY }
@@ -11,6 +12,7 @@ declare global {
     ohMyPpt?: {
       loadDoc: (json: string) => boolean
       getDoc: () => string
+      importDesignMd: (markdown: string) => ThemePreset | null
     }
   }
 }
@@ -105,4 +107,9 @@ export function loadDoc(json: string): boolean {
   }
 }
 
-window.ohMyPpt = { loadDoc, getDoc: getDocJson }
+window.ohMyPpt = {
+  loadDoc,
+  getDoc: getDocJson,
+  /** DESIGN.md（OpenDesign 9 节 schema 子集）→ ThemePreset；失败返回 null。 */
+  importDesignMd: (markdown: string) => parseDesignMd(markdown) as ThemePreset | null,
+}

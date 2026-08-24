@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { ThemeConfig } from '../types'
+import type { ThemeConfig, ThemePreset } from '../types'
 import { deriveAccentFamily, contrastOn } from '../theme/color-ramp'
 import { deriveCanvas } from '../theme/canvas'
+import { findTheme } from '../theme/presets'
 
 const STORAGE_KEY = 'oh-my-ppt:theme'
 const DEFAULT_ACCENT = '#61b0f1'
 const DANGER = '#e06c75'
+
+/** 密度 → φ 基准倍率（影响全局 --spacing-phi-md）。 */
+const DENSITY_SCALE: Record<NonNullable<ThemePreset['density']>, number> = {
+  compact: 0.875,
+  normal: 1,
+  airy: 1.125,
+}
 
 function toMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number)
@@ -22,11 +30,13 @@ function isDarkHour(active: string, inactive: string): boolean {
 
 export interface DeckThemeSource {
   accent?: string
+  /** 主题预设 id（themes/ 目录或内置）。 */
+  themePreset?: string
   theme: ThemeConfig
 }
 
-/** 把种子色推导出的全部变量写到 <html>。 */
-export function applyDeckTheme(accentHex: string, dark: boolean) {
+/** 应用主题预设（字体/密度），种子色由 preset 或 config 提供。 */
+export function applyDeckTheme(accentHex: string, dark: boolean, preset?: ThemePreset) {
   const root = document.documentElement
   const family = deriveAccentFamily(accentHex)
   root.style.setProperty('--accent', family.accent)
@@ -43,6 +53,12 @@ export function applyDeckTheme(accentHex: string, dark: boolean) {
 
   // 文字色跟随明暗（亮色近墨、暗色近纸）
   root.style.setProperty('--fg', dark ? '#dcdde3' : '#33353a')
+
+  // 预设：字体族 + 密度倍率
+  root.style.setProperty('--font-body', preset?.fontFamily ?? '')
+  root.style.setProperty('--font-heading', preset?.headingFontFamily ?? '')
+  const scale = DENSITY_SCALE[preset?.density ?? 'normal']
+  root.style.setProperty('--spacing-phi-md', `${scale}rem`)
 }
 
 export function useTheme(config: DeckThemeSource) {
@@ -71,12 +87,14 @@ export function useTheme(config: DeckThemeSource) {
     }
   })
 
-  const accent = accentOverride ?? config.accent ?? DEFAULT_ACCENT
+  const preset = findTheme(config.themePreset)
+  // 优先级：会话选色 > 主题预设（整套换装语义）> config 显式 accent > 缺省
+  const accent = accentOverride ?? preset?.accent ?? config.accent ?? DEFAULT_ACCENT
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
-    applyDeckTheme(accent, dark)
-  }, [dark, accent])
+    applyDeckTheme(accent, dark, preset)
+  }, [dark, accent, preset])
 
   const pickAccent = useCallback((seed: string) => {
     setAccentOverride(seed)

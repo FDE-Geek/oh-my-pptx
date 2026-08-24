@@ -26,6 +26,8 @@ export interface ContentSlide extends SlideBase {
   title: string
   bullets?: string[]
   step?: boolean
+  /** 版式：left 左对齐缺省 / center 居中 / card 卡片式 */
+  layout?: 'left' | 'center' | 'card'
 }
 
 export interface EndSlide extends SlideBase {
@@ -146,6 +148,24 @@ export interface ThemeConfig {
   hourDarkInactive: string
 }
 
+/** 可丢入 themes/ 目录的主题预设（对应 OpenDesign 的设计系统包）。 */
+export interface ThemePreset {
+  id: string
+  name: string
+  /** 种子色（驱动 OKLCH 全套推导）。 */
+  accent?: string
+  /** 正文字体族（CSS font-family 值）。 */
+  fontFamily?: string
+  /** 标题字体族。 */
+  headingFontFamily?: string
+  /** 版式密度：compact 紧凑 / normal 缺省 / airy 宽松（影响 φ 基准倍率）。 */
+  density?: 'compact' | 'normal' | 'airy'
+  /** 全局切换动效覆盖。 */
+  transition?: Transition
+  /** 备注（来源/授权说明）。 */
+  description?: string
+}
+
 export interface NarrationConfig {
   enabled: boolean
   lang: string
@@ -163,6 +183,8 @@ export interface PPTConfig {
   title: string
   author: string
   accent?: string
+  /** 引用 themes/ 目录中的主题预设 id（如 'tech-share'），缺省用内置风格。 */
+  themePreset?: string
   transition?: Transition
   theme: ThemeConfig
   narration: NarrationConfig

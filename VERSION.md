@@ -26,12 +26,12 @@
 
 ## 里程碑
 
-### v0.5 —— 模板与品牌（对标 OpenDesign 的 DESIGN.md / 模板体系）
+### v0.5 —— 模板与品牌（对标 OpenDesign 的 DESIGN.md / 模板体系）✅
 
-- [ ] **主题目录**：`themes/` 可丢入目录（`theme.json`：种子色/字体/版式密度），config 一行引用——对应 OpenDesign 的"丢文件夹即生效"
-- [ ] **DESIGN.md 兼容**：解析 OpenDesign 9 节 schema 的子集（色板/字体/语气），自动映射为 deck 主题
-- [ ] **版式扩展**：页型 × 版式矩阵（同一 content 页可选"居中/左对齐/卡片式"），向 31 种布局靠拢
-- [ ] **deck 模板预设**：内置 3–5 套成品模板（技术分享/产品发布/学术报告），`config.ts` 一键换装
+- [x] **主题目录**：`ThemePreset`（`src/theme/presets.ts`），config `themePreset` 一行引用；优先级 会话选色 > preset > accent > 缺省
+- [x] **DESIGN.md 兼容**：`window.ohMyPpt.importDesignMd(md)` 解析 OpenDesign 9 节 schema 子集（Palette/Typography/Voice → 种子色+字体族）
+- [x] **版式扩展**：content 页 `layout: 'center'/'card'` 版式变体
+- [x] **deck 模板预设**：内置 4 套（default/tech-share/product-launch/academic）——种子色+字体+密度（compact/normal/airy → φ 基准倍率）+动效，编辑器 Deck 设置下拉切换
 
 ### v0.6 —— AI 深度集成（对标 agent-native 循环）
 

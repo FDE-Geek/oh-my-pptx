@@ -17,6 +17,7 @@ import { SlideForm } from './SlideForm'
 import { ResizeHandle, useResizablePanel } from './ResizeHandle'
 import { SlideRenderer } from '../SlideRenderer'
 import { ACCENTS } from '../ThemePanel'
+import { BUILTIN_THEMES } from '../../theme/presets'
 import { DeckContext } from '../DeckContext'
 import { downloadConfigTs, downloadJson, parseImportedFile } from '../../utils/export'
 import { Field, TextInput, Select, Toggle, NumberInput } from './Controls'
@@ -312,6 +313,18 @@ function DeckMetaForm({
       </Field>
       <Field label="署名（封面显示）">
         <TextInput value={doc.author} onChange={(v: string) => onChange({ author: v })} />
+      </Field>
+      <Field label="主题预设（themes/）">
+        <Select<string>
+          value={doc.themePreset ?? 'default'}
+          options={BUILTIN_THEMES.map(theme => ({
+            value: theme.id,
+            label: `${theme.name} — ${theme.description ?? ''}`,
+          }))}
+          onChange={(v: string) =>
+            onChange({ themePreset: v === 'default' ? undefined : v })
+          }
+        />
       </Field>
       <Field label="主题色种子">
         <div className="flex items-center gap-phi-sm">

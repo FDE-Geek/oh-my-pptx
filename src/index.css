@@ -26,15 +26,34 @@
  * 命名必须带 phi- 前缀：Tailwind v4 中 --spacing-* 命名空间会劫持
  * max-w/min-w/w 的同名刻度（max-w-3xl 曾被解析为 var(--spacing-3xl)），
  * 前缀隔离后 max-w-3xl 恢复为 container 刻度 48rem。
+ *
+ * --spacing-phi-md 由 useTheme 按主题密度（compact/normal/airy）运行时覆写；
+ * 其余档位派生自该基准（calc 保持联动）。
  */
 @theme {
-  --spacing-phi-xs: 0.382rem; /* md/φ² ≈  6.1px */
-  --spacing-phi-sm: 0.618rem; /* md/φ  ≈  9.9px */
+  --spacing-phi-xs: calc(var(--spacing-phi-md, 1rem) / 2.618); /* md/φ² ≈  6.1px */
+  --spacing-phi-sm: calc(var(--spacing-phi-md, 1rem) / 1.618); /* md/φ  ≈  9.9px */
   --spacing-phi-md: 1rem; /* 基准    = 16px */
-  --spacing-phi-lg: 1.618rem; /* md×φ  ≈ 25.9px */
-  --spacing-phi-xl: 2.618rem; /* md×φ² ≈ 41.9px */
-  --spacing-phi-2xl: 4.236rem; /* md×φ³ ≈ 67.8px */
-  --spacing-phi-3xl: 6.854rem; /* md×φ⁴ ≈ 109.7px */
+  --spacing-phi-lg: calc(var(--spacing-phi-md, 1rem) * 1.618); /* md×φ  ≈ 25.9px */
+  --spacing-phi-xl: calc(var(--spacing-phi-md, 1rem) * 2.618); /* md×φ² ≈ 41.9px */
+  --spacing-phi-2xl: calc(var(--spacing-phi-md, 1rem) * 4.236); /* md×φ³ ≈ 67.8px */
+  --spacing-phi-3xl: calc(var(--spacing-phi-md, 1rem) * 6.854); /* md×φ⁴ ≈ 109.7px */
+}
+
+/* 主题预设字体（useTheme 写入；空值回落系统栈） */
+:root {
+  --font-body: '';
+  --font-heading: '';
+}
+
+body {
+  font-family: var(--font-body, ui-sans-serif, system-ui, 'Noto Sans SC', sans-serif);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading, inherit);
 }
 
 /*
