@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { build } from 'esbuild'
+import { hasExternalScript, hasExternalStylesheet } from './single-file-checks.mjs'
 
 const root = resolve(process.cwd())
 const outDir = join(root, 'dist-single')
@@ -47,8 +48,8 @@ writeFileSync(outFile, html)
 const final = readFileSync(outFile, 'utf8')
 const checks = [
   ['doc block present', final.includes('id="oh-my-ppt-doc"')],
-  ['no external script', !/<script[^>]+src=/.test(final)],
-  ['no external stylesheet', !/<link[^>]+rel="stylesheet"[^>]+href=/.test(final)],
+  ['no external script', !hasExternalScript(final)],
+  ['no external stylesheet', !hasExternalStylesheet(final)],
   ['json extractable', (() => {
     const match = final.match(
       /<script type="application\/json" id="oh-my-ppt-doc">([\s\S]*?)<\/script>/,
