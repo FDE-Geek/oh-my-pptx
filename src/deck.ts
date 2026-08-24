@@ -27,7 +27,7 @@ function readDocBlock(): PPTConfig | null {
   if (!element?.textContent) return null
   try {
     const parsed = JSON.parse(element.textContent) as PPTConfig
-    return Array.isArray(parsed.slides) ? parsed : null
+    return isValidDoc(parsed) ? parsed : null
   } catch {
     return null
   }
@@ -38,10 +38,15 @@ function readPreview(): PPTConfig | null {
     const raw = sessionStorage.getItem(PREVIEW_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as PPTConfig
-    return Array.isArray(parsed.slides) ? parsed : null
+    return isValidDoc(parsed) ? parsed : null
   } catch {
     return null
   }
+}
+
+/** 有效性：至少 1 页（空 slides 的 deck 在渲染层会白屏，读取层直接拒绝）。 */
+function isValidDoc(doc: PPTConfig | null): doc is PPTConfig {
+  return !!doc && Array.isArray(doc.slides) && doc.slides.length > 0
 }
 
 /** 编辑器草稿（localStorage，跨刷新/重启保留）。 */
@@ -50,7 +55,7 @@ export function readDraft(): PPTConfig | null {
     const raw = localStorage.getItem(DRAFT_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as PPTConfig
-    return Array.isArray(parsed.slides) ? parsed : null
+    return isValidDoc(parsed) ? parsed : null
   } catch {
     return null
   }

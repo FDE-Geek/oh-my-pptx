@@ -2,45 +2,45 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PPTConfig, Slide } from '../types'
 import { getDeckConfig, getSourceConfig, saveDraft, clearDraft } from '../deck'
 
-export interface EditorState {
-  doc: PPTConfig
-  selected: number
-  dirty: boolean
-}
-
 const HISTORY_LIMIT = 50
 const AUTOSAVE_DELAY = 600
 
-/** 编辑器文档状态：增删改排序 + 撤销/重做；草稿防抖自动保存到 localStorage。 */
+export interface EditorState {
+  doc: PPTConfig
+  selected: number
+  /** 历史栈：past 最近的在末尾；future 最近的在开头。与 doc 同步存于单一 state。 */
+  past: PPTConfig[]
+  future: PPTConfig[]
+}
+
+/**
+ * 编辑器文档状态：增删改排序 + 撤销/重做；草稿防抖自动保存到 localStorage。
+ * 全部更新走纯 updater（StrictMode double-invoke 安全）。
+ */
 export function useEditorDoc() {
   const [state, setState] = useState<EditorState>(() => ({
     doc: structuredClone(getDeckConfig()),
     selected: 0,
-    dirty: false,
+    past: [],
+    future: [],
   }))
-  const [past, setPast] = useState<PPTConfig[]>([])
-  const [future, setFuture] = useState<PPTConfig[]>([])
   const [savedAt, setSavedAt] = useState<number | null>(null)
   const saveTimer = useRef<number | null>(null)
   // 源文档快照（不含草稿）：恢复自草稿时 dirty 应为 true，撤销回源则自动清草稿
   const pristineJson = useRef(JSON.stringify(getSourceConfig()))
 
-  const commit = useCallback(
-    (mutate: (draft: PPTConfig) => void, select?: number) => {
-      setState(current => {
-        const draft = structuredClone(current.doc)
-        mutate(draft)
-        setPast(p => [...p.slice(-HISTORY_LIMIT + 1), current.doc])
-        setFuture([])
-        return {
-          doc: draft,
-          selected: select ?? current.selected,
-          dirty: true,
-        }
-      })
-    },
-    [],
-  )
+  const commit = useCallback((mutate: (draft: PPTConfig) => void, select?: number) => {
+    setState(current => {
+      const draft = structuredClone(current.doc)
+      mutate(draft)
+      return {
+        doc: draft,
+        selected: select ?? current.selected,
+        past: [...current.past.slice(-HISTORY_LIMIT + 1), current.doc],
+        future: [],
+      }
+    })
+  }, [])
 
   const select = useCallback((index: number) => {
     setState(s => ({ ...s, selected: Math.max(0, Math.min(index, s.doc.slides.length - 1)) }))
@@ -117,39 +117,38 @@ export function useEditorDoc() {
 
   const undo = useCallback(() => {
     setState(current => {
-      if (past.length === 0) return current
-      const previous = past[past.length - 1]
-      setPast(p => p.slice(0, -1))
-      setFuture(f => [current.doc, ...f])
+      if (current.past.length === 0) return current
+      const previous = current.past[current.past.length - 1]
       return {
         ...current,
         doc: previous,
         selected: Math.min(current.selected, previous.slides.length - 1),
-        dirty: true,
+        past: current.past.slice(0, -1),
+        future: [current.doc, ...current.future],
       }
     })
-  }, [past])
+  }, [])
 
   const redo = useCallback(() => {
     setState(current => {
-      if (future.length === 0) return current
-      const next = future[0]
-      setFuture(f => f.slice(1))
-      setPast(p => [...p, current.doc])
+      if (current.future.length === 0) return current
+      const next = current.future[0]
       return {
         ...current,
         doc: next,
         selected: Math.min(current.selected, next.slides.length - 1),
-        dirty: true,
+        past: [...current.past, current.doc],
+        future: current.future.slice(1),
       }
     })
-  }, [future])
+  }, [])
 
-  const canUndo = past.length > 0
-  const canRedo = future.length > 0
+  const canUndo = state.past.length > 0
+  const canRedo = state.future.length > 0
 
   // dirty 由内容比较得出：恢复自草稿 → true；撤销回源 → false
-  const dirty = state.dirty || JSON.stringify(state.doc) !== pristineJson.current
+  const docJson = JSON.stringify(state.doc)
+  const dirty = docJson !== pristineJson.current
 
   // 草稿自动保存：有实际修改才存；改回源内容则清掉草稿
   useEffect(() => {
@@ -158,7 +157,7 @@ export function useEditorDoc() {
     }
     saveTimer.current = window.setTimeout(() => {
       saveTimer.current = null
-      if (JSON.stringify(state.doc) !== pristineJson.current) {
+      if (docJson !== pristineJson.current) {
         if (saveDraft(state.doc)) {
           setSavedAt(Date.now())
         }
@@ -172,7 +171,7 @@ export function useEditorDoc() {
         window.clearTimeout(saveTimer.current)
       }
     }
-  }, [state.doc])
+  }, [docJson, state.doc])
 
   const discardDraft = useCallback(() => {
     clearDraft()
@@ -183,10 +182,9 @@ export function useEditorDoc() {
     setState({
       doc: structuredClone(doc),
       selected: 0,
-      dirty: false,
+      past: [],
+      future: [],
     })
-    setPast([])
-    setFuture([])
   }, [])
 
   return useMemo(

@@ -46,7 +46,8 @@ export async function exportStandaloneHtml(doc: PPTConfig): Promise<void> {
   const json = JSON.stringify(doc).replace(/</g, '\\u003c')
   const block = `<script type="application/json" id="${DOC_ID}">${json}</script>`
 
-  const replaced = shell.replace(DOC_BLOCK_RE, block)
+  // 函数式 replacement：字符串 replacement 会解释 $&/$' 等特殊模式（注入风险）
+  const replaced = shell.replace(DOC_BLOCK_RE, () => block)
   if (!DOC_BLOCK_RE.test(replaced)) {
     throw new Error('数据块替换失败（内部错误）')
   }

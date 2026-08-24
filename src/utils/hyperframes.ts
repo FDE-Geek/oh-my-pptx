@@ -95,7 +95,7 @@ export function toHyperframesComposition(
   // 纯浏览器预览播放器：URL 带 ?preview 时启用（不影响 hyperframes render 的解析）
   const previewPlayer = `
   (function () {
-    var docTitle = ${JSON.stringify(doc.title)};
+    var docTitle = ${JSON.stringify(doc.title).replace(/</g, '\\u003c')};
     if (!/[?&]preview/.test(location.search)) return;
     var stage = document.getElementById('stage');
     var clips = Array.prototype.slice.call(stage.querySelectorAll('.clip'));

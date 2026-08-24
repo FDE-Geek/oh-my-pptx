@@ -15,6 +15,22 @@ const DENSITY_SCALE: Record<NonNullable<ThemePreset['density']>, number> = {
   airy: 1.125,
 }
 
+/** 存储访问守卫：隐私模式/沙箱 iframe 抛 SecurityError 时静默降级。 */
+function safeGet(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+function safeSet(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value)
+  } catch {
+    /* ignore */
+  }
+}
+
 function toMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number)
   return h * 60 + m
@@ -73,7 +89,7 @@ export function useTheme(config: DeckThemeSource) {
   const { theme } = config
 
   const [dark, setDark] = useState<boolean>(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY)
+    const saved = safeGet(STORAGE_KEY)
     if (saved === 'dark') return true
     if (saved === 'light') return false
     if (theme.autoChange) {
@@ -96,14 +112,14 @@ export function useTheme(config: DeckThemeSource) {
   })
 
   // 用户手动切换过 → 深色含舞台全局反转；自动跟随（OS/时段）→ 只暗 chrome。
-  const [manual, setManual] = useState<boolean>(
-    () => window.localStorage.getItem(STORAGE_KEY) !== null,
-  )
+  const [manual, setManual] = useState<boolean>(() => safeGet(STORAGE_KEY) !== null)
   const invertSlides = theme.invertSlides === true || manual
 
   const preset = findTheme(config.themePreset)
   // 优先级：会话选色 > 主题预设（整套换装语义）> config 显式 accent > 缺省
-  const accent = accentOverride ?? preset?.accent ?? config.accent ?? DEFAULT_ACCENT
+  const rawAccent = accentOverride ?? preset?.accent ?? config.accent ?? DEFAULT_ACCENT
+  const HEX_OK = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+  const accent = HEX_OK.test(rawAccent) ? rawAccent : DEFAULT_ACCENT
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -123,7 +139,7 @@ export function useTheme(config: DeckThemeSource) {
 
   const toggle = useCallback(() => {
     setDark(current => {
-      window.localStorage.setItem(STORAGE_KEY, current ? 'light' : 'dark')
+      safeSet(STORAGE_KEY, current ? 'light' : 'dark')
       return !current
     })
     setManual(true)

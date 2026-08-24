@@ -66,6 +66,9 @@ export function useAutoPlay({
   /** 停留一段时长（无旁白）。 */
   const wait = (ms: number) => new Promise<void>(r => window.setTimeout(r, ms))
 
+  /** 当前在播的音频（stopAll 时强制停掉，避免取消后声音残留/叠音）。 */
+  const activeAudioRef = useRef<{ audio: HTMLAudioElement; stopMix?: () => void } | null>(null)
+
   /** 播放一页旁白：音频文件优先（可混入录制流），否则 TTS，否则静默停时。 */
   const narrateSlide = useCallback(
     async (index: number): Promise<void> => {
@@ -84,26 +87,31 @@ export function useAutoPlay({
       }
 
       if (slide.narrationAudio) {
+        const audio = new Audio(slide.narrationAudio)
+        // ended 与 error 都放行——加载失败不能把自动放映永久卡死
+        const done = new Promise<void>(r => {
+          audio.addEventListener('ended', () => r(), { once: true })
+          audio.addEventListener('error', () => r(), { once: true })
+        })
         const mixerInstance = mixerRef.current
+        let stopMix: (() => void) | undefined
         if (mixerInstance) {
-          const stopAudio = await mixerInstance.mixUrl(slide.narrationAudio!)
-          const audio = new Audio(slide.narrationAudio)
-          audio.play().catch(() => {})
-          const onEnd = () => {
-            stopAudio()
-            audio.removeEventListener('ended', onEnd)
+          try {
+            stopMix = await mixerInstance.mixUrl(slide.narrationAudio)
+          } catch {
+            /* 混音失败退化为直接播放 */
           }
-          audio.addEventListener('ended', onEnd)
-          await new Promise<void>(r => audio.addEventListener('ended', () => r(), { once: true }))
-          await wait(400)
-        } else {
-          // 非录制模式：直接 <audio> 播放
-          const audio = new Audio(slide.narrationAudio)
-          audio.volume = 1
-          await audio.play().catch(() => {})
-          await new Promise<void>(r => audio.addEventListener('ended', () => r(), { once: true }))
-          await wait(400)
         }
+        activeAudioRef.current = { audio, stopMix }
+        try {
+          await audio.play()
+        } catch {
+          /* 自动播放策略/文件缺失：静默跳过等待 */
+        }
+        await done
+        stopMix?.()
+        activeAudioRef.current = null
+        await wait(400)
         return
       }
 
@@ -124,6 +132,13 @@ export function useAutoPlay({
     clearTimer()
     clearTimeline()
     window.speechSynthesis?.cancel()
+    // 强制停掉在播的旁白音频（取消放映不留残音）
+    const active = activeAudioRef.current
+    if (active) {
+      active.audio.pause()
+      active.stopMix?.()
+      activeAudioRef.current = null
+    }
   }, [])
 
   const start = useCallback(

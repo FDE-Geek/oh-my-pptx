@@ -149,7 +149,8 @@ export default function App() {
   useEffect(() => {
     if (!embed || !frame || editing) return
     const { start } = embedRef.current
-    goto(start - 1)
+    // broadcast=false：同源页面上多个 frame iframe 会互相劫持页码（C2）
+    goto(start - 1, false)
     const slide = DECK.slides[start - 1]
     if (!slide?.animation?.length) return
     const timers = slide.animation.map((item, i) =>

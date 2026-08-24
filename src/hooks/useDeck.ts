@@ -33,6 +33,8 @@ export function useDeck(slides: Slide[], enabled = true): DeckState {
   const [current, setCurrent] = useState(() => slideFromHash(count))
   const [step, setStep] = useState(0)
   const [overview, setOverview] = useState(false)
+  const enabledRef = useRef(enabled)
+  enabledRef.current = enabled
   const channelRef = useRef<ReturnType<typeof createDeckChannel> | null>(null)
 
   const stepsOf = useCallback(
@@ -49,7 +51,7 @@ export function useDeck(slides: Slide[], enabled = true): DeckState {
       setCurrent(clamped)
       setStep(0)
       setOverview(false)
-      if (broadcast && channelRef.current) {
+      if (broadcast && enabledRef.current && channelRef.current) {
         const message: DeckMessage = { kind: 'goto', page: clamped }
         channelRef.current.post(message)
       }
@@ -86,6 +88,8 @@ export function useDeck(slides: Slide[], enabled = true): DeckState {
   const forceStep = useCallback((n: number) => setStep(Math.max(0, n)), [])
 
   useEffect(() => {
+    // 禁用态（编辑器/frame iframe）不订阅也不广播——避免串台
+    if (!enabledRef.current) return
     const channel = createDeckChannel()
     channelRef.current = channel
     const unsubscribe = channel.subscribe(message => {

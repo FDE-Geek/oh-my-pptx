@@ -68,9 +68,11 @@ export function DiagramCanvas({
       window.removeEventListener('resize', onResize)
       graph.dispose()
     }
-    // 画布只初始化一次；后续数据经画布自身交互产生并回流
+    // 依赖 remountKey：外层 div 用了 key=remountKey，spec 变化时 host 元素重建，
+    // effect 必须跟着重跑才能把新 graph 附着到新 DOM（否则画布脱离 DOM 变空白）。
+    // 画布自身交互回流产生的 spec 与画布一致，重挂等价无害。
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [remountKey])
 
   const addNode = () => {
     const id = `n${Date.now().toString(36)}`

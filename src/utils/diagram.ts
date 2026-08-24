@@ -212,7 +212,10 @@ function addSpecNodes(graph: Graph, spec: DiagramSpec) {
 }
 
 function addSpecEdges(graph: Graph, spec: DiagramSpec) {
+  // 悬空边过滤：lint 视为 error 的引用在渲染层静默跳过（X6 对缺失 terminal 不友好）
+  const ids = new Set(spec.nodes.map(n => n.id))
   for (const edge of spec.edges) {
+    if (!ids.has(edge.source) || !ids.has(edge.target)) continue
     graph.addEdge({
       source: edge.source,
       target: edge.target,
@@ -318,10 +321,20 @@ export function graphToSpec(graph: Graph, spec: DiagramSpec): DiagramSpec {
     }),
     edges: graph.getEdges().map(edge => {
       const json = edge.toJSON() as { labels?: unknown }
+      const source = String(edge.getSourceCellId())
+      const target = String(edge.getTargetCellId())
+      // 保留原 spec 的边属性（dashed/arrow/router）——画布交互不表达这些，
+      // 从旧 spec 按 source→target 合并，避免拖一下节点虚线变实线。
+      const prev = spec.edges.find(
+        e => e.source === source && e.target === target,
+      )
       return {
-        source: String(edge.getSourceCellId()),
-        target: String(edge.getTargetCellId()),
-        label: edgeLabelText(json),
+        source,
+        target,
+        label: edgeLabelText(json) ?? prev?.label,
+        dashed: prev?.dashed,
+        arrow: prev?.arrow,
+        router: prev?.router,
       }
     }),
   }

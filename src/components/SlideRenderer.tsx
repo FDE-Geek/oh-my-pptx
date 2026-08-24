@@ -28,11 +28,19 @@ export function SlideRenderer({
   transition = 'fade',
   step = 0,
 }: {
-  slide: Slide
+  slide: Slide | undefined
   transition?: Transition
   step?: number
 }) {
   const body = (() => {
+    if (!slide) {
+      return (
+        <div className="flex flex-col items-center gap-phi-md text-center">
+          <p className="text-4xl font-bold text-sfg">（空页）</p>
+          <p className="text-lg text-sfg">此 deck 没有任何幻灯片</p>
+        </div>
+      )
+    }
     switch (slide.type) {
       case 'cover':
         return <Cover slide={slide} />
@@ -56,10 +64,20 @@ export function SlideRenderer({
         return <ChartSlideView slide={slide} />
       case 'diagram':
         return <DiagramSlideView slide={slide} />
+      default:
+        // 格式规范：未知页型渲染占位页（不崩、不丢页码）
+        return (
+          <div className="flex flex-col items-center gap-phi-md text-center">
+            <p className="font-mono text-sm tracking-widest text-accent uppercase">
+              未知页型
+            </p>
+            <p className="text-4xl font-bold text-sfg">{(slide as { type: string } | undefined)?.type}</p>
+          </div>
+        )
     }
   })()
 
-  const active = slide.transition ?? transition
+  const active = slide?.transition ?? transition
   const animation =
     active === 'slide'
       ? 'slide-anim'
