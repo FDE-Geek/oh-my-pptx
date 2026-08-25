@@ -20,6 +20,7 @@ oh-my-ppt 演示文稿由 `src/config.ts` 的 `CONFIG` 对象完整定义。本 
 ## 快速参考
 
 - 页型（11 种）：cover / section（可 `items` 做 TOC）/ content（layout: left|center|card, step）/ two-column / quote / code / image / table / chart（bar|line|pie）/ diagram（X6 + dagre）/ end（可 `takeaways`）
+- 生成 diagram 优先 `flow` 简写（`cfg[读配置] -> db -.-> swm`）；写入 `config.ts` 前必须已是 nodes/edges（`npm run generate` 会自动展开）
 - 主题：`themePreset: 'tech-share' | 'product-launch' | 'academic'`；或 accent 种子色（OKLCH 推导全套）
 - 每页可选 `tag`（页眉面包屑）、`notes`（讲者备注：目的+转场）与 `narration`（TTS 口播稿）
 - 单文件构建：`npm run build:single` → `dist-single/oh-my-ppt.html`

@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import {
-  hasExternalScript,
-  hasExternalStylesheet,
-  htmlSkeleton,
-} from '../scripts/single-file-checks.mjs'
+// @ts-expect-error untyped sibling of build-single.mjs
+import * as checks from '../scripts/single-file-checks.mjs'
+
+const { hasExternalScript, hasExternalStylesheet, htmlSkeleton } = checks
 
 const gsapLiteral = '<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"><\\/script>'
 

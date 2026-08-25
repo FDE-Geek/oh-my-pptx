@@ -82,6 +82,77 @@ describe('generate.mjs CLI', () => {
     }
   }, 20_000)
 
+  it('diagram.flow 展开后落盘无 flow 键', async () => {
+    const deck = {
+      title: 'X',
+      author: 't',
+      narration: { enabled: false, lang: 'zh-CN', rate: 1 },
+      autoplay: { enabled: false, defaultDuration: 3000 },
+      theme,
+      slides: [
+        { type: 'cover', title: 'T' },
+        {
+          type: 'diagram',
+          title: '链',
+          notes: '目的：验收简写。转场：结束。',
+          diagram: { flow: '@dir LR\ncfg[读配置] -> db[数据库]\ncfg -.-> db : 可选' },
+        },
+        { type: 'end', title: 'Thanks', takeaways: ['记住'] },
+      ],
+    }
+    const { server, url } = await startMock(deck)
+    try {
+      const { stdout, stderr, code } = await runGenerate(
+        ['简写验收', '--prompt', 'full-deck'],
+        { OHMY_PPT_BASE_URL: url, OHMY_PPT_API_KEY: 'test', OHMY_PPT_MODEL: 'mock' },
+      )
+      expect(code).toBe(0)
+      const out = JSON.parse(stdout)
+      const diagram = out.slides.find((s: { type: string }) => s.type === 'diagram').diagram
+      expect(diagram.flow).toBeUndefined()
+      expect(diagram.nodes.map((n: { id: string }) => n.id)).toEqual(['cfg', 'db'])
+      expect(diagram.edges.some((e: { dashed?: boolean }) => e.dashed)).toBe(true)
+      expect(stderr).not.toContain('编译失败')
+    } finally {
+      server.close()
+    }
+  }, 20_000)
+
+  it('flow 与 nodes 混写非 0 退出', async () => {
+    const deck = {
+      title: 'X',
+      author: 't',
+      narration: { enabled: false, lang: 'zh-CN', rate: 1 },
+      autoplay: { enabled: false, defaultDuration: 3000 },
+      theme,
+      slides: [
+        { type: 'cover', title: 'T' },
+        {
+          type: 'diagram',
+          title: '混',
+          diagram: {
+            flow: 'a -> b',
+            nodes: [{ id: 'a', x: 0, y: 0, label: 'a' }],
+            edges: [],
+          },
+        },
+        { type: 'end', title: 'Thanks', takeaways: ['记住'] },
+      ],
+    }
+    const { server, url } = await startMock(deck)
+    try {
+      const { stderr, code } = await runGenerate(
+        ['混写', '--prompt', 'full-deck'],
+        { OHMY_PPT_BASE_URL: url, OHMY_PPT_API_KEY: 'test', OHMY_PPT_MODEL: 'mock' },
+      )
+      expect(code).not.toBe(0)
+      expect(stderr).toContain('编译失败')
+      expect(stderr).toContain('不能同时')
+    } finally {
+      server.close()
+    }
+  }, 20_000)
+
   it('--ask 注入澄清摘要与页数预算', async () => {
     const { server, url } = await startMock(mockDeck())
     try {

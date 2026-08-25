@@ -82,6 +82,7 @@ chart 约束：`kind ∈ bar|line|pie`；每条 `series.data.length === labels.l
 ```
 
 编辑：图只在专注模式 / 图工作台改 `diagram`；属性栏无画布。schema 字段不因此新增。
+生成可用箭头简写 `diagram.flow`（自研小语法，非 Infographic）；落盘必须是 `nodes`/`edges`，明文块与 `config.ts` 不收 `flow`。
 
 ## 5. 单文件分发格式（splice 契约）
 

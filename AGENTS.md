@@ -77,6 +77,7 @@ oh-my-ppt 的演示文稿由 `src/config.ts` 中的 `CONFIG` 对象完整定义�
 - 边：`source/target` 引用节点 id；`label/dashed/arrow`（缺省 true）/ `router`（`orth` 正交缺省 / `normal` 直线）可选
 - 布局：`layout: 'dagre'` 时坐标自动计算（编辑器「自动布局 ↕/↔」按钮等价）
 - 图只在专注模式 / 图工作台编辑（属性栏只有入口卡片，无 Graph 宿主）：拖节点、框选、对齐、缩放、从边缘拉连线、点选改节点/边属性
+- **生成层**可用箭头简写 `diagram.flow`（`cfg[读配置] -> db -.-> swm`），CLI 会编译成 nodes/edges 再落盘。`config.ts` / 数据块只认 DiagramSpec，不要手写 flow
 
 ## 写作守则
 

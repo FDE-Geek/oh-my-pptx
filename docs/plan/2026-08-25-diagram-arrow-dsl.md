@@ -1,6 +1,6 @@
 # 计划：diagram 箭头简写编译器（生成层）
 
-> 状态：草案（待开工）
+> 状态：已落地（2026-08-25）
 > 日期：2026-08-25
 > 来源决策：`docs/decision/2026-08-25-keep-x6-over-infographic.md` v2
 > 关联：`DiagramSpec` / `src/utils/lint.ts` / `scripts/generate.mjs` / `prompts/index.ts`

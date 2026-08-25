@@ -41,7 +41,7 @@ type Slide =
   | { type: 'image', title: string, src: string, caption?: string }
   | { type: 'table', title: string, headers: string[], rows: string[][] }
   | { type: 'chart', title: string, chart: { kind: 'bar' | 'line' | 'pie', labels: string[], series: { name: string, data: number[] }[] } }
-  | { type: 'diagram', title: string, diagram: { layout?: 'dagre', layoutDir?: 'TB' | 'LR', nodes: { id: string, x: number, y: number, label: string, fill?: string, shape?: 'rect' | 'ellipse' | 'diamond' | 'double-rect' }[], edges: { source: string, target: string, label?: string, dashed?: boolean }[] } }
+  | { type: 'diagram', title: string, diagram: { layout?: 'dagre', layoutDir?: 'TB' | 'LR', flow?: string, nodes?: { id: string, x: number, y: number, label: string, fill?: string, shape?: 'rect' | 'ellipse' | 'diamond' | 'double-rect' }[], edges?: { source: string, target: string, label?: string, dashed?: boolean }[] } }
   | { type: 'end', title: string, subtitle?: string, takeaways?: string[] }
 
 每页可选 tag（页眉面包屑）、notes（讲者备注）与 narration（TTS 旁白口播稿）。
@@ -50,7 +50,7 @@ section.items 有值时渲染为 TOC 目录页；end.takeaways 为结尾记忆�
 export const WRITING_RULES = `写作守则：
 1. 一页一个观点：content 页 bullets ≤ 6 条，每条 ≤ 20 字（中文）。
 2. 章节节奏：每 4–6 页插一个 section 过渡页。
-3. 数据表达：对比用 two-column，趋势用 chart(line)，占比用 chart(pie)，明细用 table，流程/架构用 diagram（layout:'dagre' 时坐标可全 0）。
+3. 数据表达：对比用 two-column，趋势用 chart(line)，占比用 chart(pie)，明细用 table，流程/架构用 diagram。diagram 优先写 flow 简写（自研，非 Infographic），例如 "@dir LR" 换行后 "cfg[读配置] -> db[数据库] -.-> swm"。不要 flow 与 nodes 混写；id 仅 ASCII。生成器会展开成 nodes/edges。
 4. 讲稿字段分工（不要写反）：
    | 字段 | 写给谁 | 写法 | 示例 |
    | notes | 讲者 | 目的：…转场：… | 目的：建立问题意识。转场：下一页给出数据。 |
@@ -63,7 +63,7 @@ export const QUALITY_RULES = `质量自检（生成后立即心算检查，不�
 - 首页必须是 cover，末页必须是 end。
 - chart 页 series.data 与 labels 数量一致且非空。
 - table 页 rows 每行列数 = headers.length。
-- diagram 页 edges 引用的 source/target 都在 nodes.id 里。
+- diagram 页优先 flow 简写；若写 nodes/edges，则 source/target 都在 nodes.id 里。id 只含 ASCII。
 - 总页数 8–20 页之间。`
 
 const NOTES_SHAPE = `每页 notes 用「目的：…转场：…」；narration 写完整口播句。end 给 takeaways 三条记忆点。`

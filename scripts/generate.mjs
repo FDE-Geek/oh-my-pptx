@@ -55,6 +55,33 @@ function lintBasic(deck) {
   return issues
 }
 
+async function loadDiagramFlow() {
+  try {
+    return await import('../src/utils/diagram-flow.ts')
+  } catch {
+    /* 无原生 TS 加载时走 esbuild */
+  }
+  try {
+    const { build } = await import('esbuild')
+    const result = await build({
+      entryPoints: [join(root, 'src/utils/diagram-flow.ts')],
+      bundle: true,
+      format: 'esm',
+      platform: 'node',
+      write: false,
+      outfile: 'diagram-flow.gen.mjs',
+    })
+    const genDir = join(root, '.tmp-generate')
+    mkdirSync(genDir, { recursive: true })
+    const genFile = join(genDir, 'diagram-flow.gen.mjs')
+    writeFileSync(genFile, result.outputFiles[0].text)
+    return await import(genFile)
+  } catch (e) {
+    console.error(`⚠ diagram.flow 编译器不可用：${e.message}`)
+    return null
+  }
+}
+
 async function loadLintDeck() {
   try {
     return await import('../src/utils/lint.ts')
@@ -226,6 +253,23 @@ try {
 const DEFAULT_AUTHOR = 'Abel-数字牧民'
 if (!deck.author || deck.author === 'abel' || deck.author === 'Abel') {
   deck.author = DEFAULT_AUTHOR
+}
+
+// ── diagram.flow → DiagramSpec（lint 之前；失败不落盘）────────
+const flowApi = await loadDiagramFlow()
+if (flowApi?.expandDeckDiagrams) {
+  const expanded = flowApi.expandDeckDiagrams(deck)
+  if (!expanded.ok) {
+    console.error(`✗ 第 ${expanded.page} 页 diagram.flow 编译失败：`)
+    for (const issue of expanded.errors) {
+      const where = issue.snippet ? `「${issue.snippet}」` : ''
+      console.error(`  L${issue.line}: ${issue.message}${where ? ' ' + where : ''}`)
+    }
+    process.exit(1)
+  }
+} else if (JSON.stringify(deck).includes('"flow"')) {
+  console.error('✗ 模型输出了 diagram.flow，但编译器未能加载')
+  process.exit(1)
 }
 
 // ── 质量闸 ───────────────────────────────────────────────────
