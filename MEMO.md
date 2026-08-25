@@ -85,6 +85,11 @@
 | diagram 编辑画布用 `key={JSON.stringify(spec)}` 重挂 | 外部变更（布局/撤销）需重建，自身回流重挂等价无害 | 精细 diff 更新（复杂度高） |
 | HyperFrames 借力而非自研逐帧 seek | 42k 生态的确定性渲染/音频/Lambda 白拿 | 自研 frame=N seek（工作量大且重复造轮） |
 | 多 deck 工作区延到 v1.x | 需扩数据模型，会破坏 1.0 契约 | 硬上（契约污染） |
+| diagram 继续用 X6，不换 Infographic | 岗位是可编辑 DAG，不是模板信息图；换引擎拆契约/工作台/主题。生成层自研箭头简写即可（见 decision 2026-08-25） | 整包替换 @antv/infographic 0.2 |
+
+## 观察清单
+
+- **@antv/infographic**（季度）：1.0 与稳定承诺；是否出现**图模型级**编辑（任意节点/边双向写回 JSON，模板画板微调不算）；外部 CSS 变量 / OKLCH 种子跟随；单文件增量实测 ≤ 300KB。两条以上再议换引擎。记录：`docs/decision/2026-08-25-keep-x6-over-infographic.md`。
 
 ## 待验证清单（拿到好环境后）
 
