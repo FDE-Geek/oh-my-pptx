@@ -15,6 +15,7 @@ import { EditorShell } from './components/editor/EditorShell'
 import { DeckContext } from './components/DeckContext'
 import { createRecorder, downloadBlob } from './utils/recorder'
 import { readEmbedParams } from './utils/embed'
+import { slideLiveText } from './utils/a11y'
 
 export default function App() {
   const embedRef = useRef(readEmbedParams())
@@ -292,7 +293,13 @@ export default function App() {
   return (
     <DeckContext.Provider value={DECK}>
       <div className="relative h-full w-full overflow-hidden bg-bg text-fg">
-        <main className="flex h-full items-center justify-center px-phi-3xl">
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {slideLiveText(current, total, DECK.slides[current])}
+        </div>
+        <main
+          className="flex h-full items-center justify-center px-phi-3xl"
+          aria-label={slideLiveText(current, total, DECK.slides[current])}
+        >
           <SlideRenderer
             key={current}
             slide={DECK.slides[current]}
@@ -302,7 +309,10 @@ export default function App() {
         </main>
         {!embed && (
           <>
-            <span className="no-print absolute bottom-lg left-lg text-sm text-[var(--chrome-sfg)] tabular-nums">
+            <span
+              className="no-print absolute bottom-lg left-lg text-sm text-[var(--chrome-sfg)] tabular-nums"
+              aria-hidden="true"
+            >
               {current + 1} / {total}
             </span>
             <div className="no-print">

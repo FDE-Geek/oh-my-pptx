@@ -184,6 +184,19 @@ html.dark {
   animation: slide-left 0.35s ease both;
 }
 
+:focus-visible {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-enter,
+  .zoom-anim,
+  .slide-anim {
+    animation: none !important;
+  }
+}
+
 /*
  * 细滚动条：accent 种子染色（OKLCH 推导层注入的变量），
  * 悬停加深提示可拖。Firefox 走 scrollbar-width/scrollbar-color。

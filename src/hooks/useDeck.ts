@@ -127,8 +127,13 @@ export function useDeck(slides: Slide[], enabled = true): DeckState {
         target?.tagName === 'INPUT' ||
         target?.tagName === 'TEXTAREA' ||
         target?.tagName === 'SELECT' ||
-        target?.isContentEditable
+        target?.isContentEditable ||
+        target?.closest('[role="menu"]')
       ) {
+        return
+      }
+      // 按钮自己吃空格/回车，避免与翻页叠一次
+      if ((e.key === ' ' || e.key === 'Enter') && target?.tagName === 'BUTTON') {
         return
       }
       if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {

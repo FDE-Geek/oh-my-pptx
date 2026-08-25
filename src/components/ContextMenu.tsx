@@ -15,8 +15,17 @@ export function ContextMenu({ items }: { items: MenuItem[] }) {
   const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null)
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const openRef = useRef(false)
+  openRef.current = Boolean(anchor)
 
   useEffect(() => {
+    const typing = (el: EventTarget | null) =>
+      el instanceof HTMLElement &&
+      (el.tagName === 'INPUT' ||
+        el.tagName === 'TEXTAREA' ||
+        el.tagName === 'SELECT' ||
+        el.isContentEditable)
+
     const onContextMenu = (e: MouseEvent) => {
       e.preventDefault()
       setPos(null)
@@ -27,7 +36,20 @@ export function ContextMenu({ items }: { items: MenuItem[] }) {
       setPos(null)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
+      if (e.key === 'Escape' && openRef.current) {
+        e.preventDefault()
+        e.stopPropagation()
+        close()
+        return
+      }
+      if (typing(e.target) || typing(document.activeElement)) return
+      if (e.key === 'm' || e.key === 'M' || e.key === '?') {
+        e.preventDefault()
+        setPos(null)
+        setAnchor(cur =>
+          cur ? null : { x: window.innerWidth - 72, y: window.innerHeight - 72 },
+        )
+      }
     }
     document.addEventListener('contextmenu', onContextMenu)
     document.addEventListener('click', close)
@@ -54,11 +76,18 @@ export function ContextMenu({ items }: { items: MenuItem[] }) {
     setPos({ x, y })
   }, [anchor])
 
+  useEffect(() => {
+    if (!pos || !menuRef.current) return
+    menuRef.current.querySelector<HTMLElement>('[role="menuitem"]')?.focus()
+  }, [pos])
+
   if (!anchor) return null
 
   return (
     <div
       ref={menuRef}
+      role="menu"
+      aria-label="放映菜单"
       className={`no-print fixed z-50 w-60 overflow-hidden rounded-xl border border-[var(--chrome-outline)] bg-[var(--chrome-card)] py-phi-sm shadow-2xl ${
         pos ? '' : 'invisible'
       }`}
@@ -75,8 +104,10 @@ export function ContextMenu({ items }: { items: MenuItem[] }) {
             <div onClick={e => e.stopPropagation()}>{item.panel}</div>
           ) : (
             <button
+              type="button"
+              role="menuitem"
               onClick={item.onClick}
-              className={`flex w-full items-center gap-phi-sm px-phi-md py-phi-sm text-left text-sm transition-colors hover:bg-accent-dim/20 hover:text-[var(--chrome-accent)] ${
+              className={`flex w-full items-center gap-phi-sm px-phi-md py-phi-sm text-left text-sm transition-colors hover:bg-accent-dim/20 hover:text-[var(--chrome-accent)] focus-visible:bg-accent-dim/20 focus-visible:outline-none ${
                 item.danger ? 'text-danger' : 'text-fg'
               }`}
             >

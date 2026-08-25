@@ -35,8 +35,9 @@ export function ThemePanel({
           主题色
         </span>
         <button
+          type="button"
           onClick={onToggleDark}
-          className="flex items-center gap-phi-xs rounded-full bg-bg px-phi-sm py-phi-xs text-xs text-sfg transition-colors hover:text-[var(--chrome-accent)]"
+          className="flex items-center gap-phi-xs rounded-full bg-bg px-phi-sm py-phi-xs text-xs text-sfg transition-colors hover:text-[var(--chrome-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           {dark ? <Sun size={12} /> : <Moon size={12} />}
           {dark ? '浅色' : '深色'}
@@ -48,8 +49,11 @@ export function ThemePanel({
             accent.toLowerCase() === option.seed.toLowerCase()
           return (
             <button
+              type="button"
               key={option.seed}
               title={option.name}
+              aria-label={option.name}
+              aria-pressed={active}
               onClick={() => onPickAccent(option.seed)}
               className={`relative flex h-9 items-center justify-center rounded-lg border transition-all ${
                 active

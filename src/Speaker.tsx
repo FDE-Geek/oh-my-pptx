@@ -39,12 +39,14 @@ export default function Speaker() {
   return (
     <div className="flex h-full w-full flex-col gap-phi-md bg-[var(--chrome-bg)] p-phi-lg text-[var(--chrome-fg)]">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-sfg tabular-nums">
+        <span className="text-sm text-sfg tabular-nums" aria-live="polite">
           {page + 1} / {DECK.slides.length}
         </span>
         <button
+          type="button"
           onClick={() => setRunning(r => !r)}
-          className="rounded-full bg-[var(--chrome-card)] px-phi-md py-phi-xs text-sm text-sfg tabular-nums hover:text-[var(--chrome-accent)]"
+          aria-label={running ? `暂停计时 ${minutes}:${seconds}` : `继续计时 ${minutes}:${seconds}`}
+          className="rounded-full bg-[var(--chrome-card)] px-phi-md py-phi-xs text-sm text-sfg tabular-nums hover:text-[var(--chrome-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--chrome-accent)]"
         >
           {running ? '⏸' : '▶'} {minutes}:{seconds}
         </button>
@@ -52,7 +54,7 @@ export default function Speaker() {
 
       <div className="grid flex-1 grid-cols-2 gap-phi-md overflow-hidden">
         <div className="flex flex-col gap-2 overflow-hidden">
-          <p className="text-xs font-medium tracking-widest text-accent uppercase">Current</p>
+          <p className="text-xs font-medium tracking-widest text-accent uppercase">当前</p>
           <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[var(--chrome-card)]">
             <div className="h-full max-h-full w-full max-w-full scale-[0.45]">
               <SlideRenderer slide={slide} transition="none" />
@@ -60,7 +62,7 @@ export default function Speaker() {
           </div>
         </div>
         <div className="flex flex-col gap-2 overflow-hidden">
-          <p className="text-xs font-medium tracking-widest text-sfg uppercase">Next</p>
+          <p className="text-xs font-medium tracking-widest text-sfg uppercase">下一页</p>
           <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[var(--chrome-card)] opacity-70">
             {nextSlide ? (
               <div className="h-full max-h-full w-full max-w-full scale-[0.45]">
@@ -74,7 +76,7 @@ export default function Speaker() {
       </div>
 
       <div className="h-28 thin-scroll shrink-0 overflow-y-auto rounded-lg bg-[var(--chrome-card)] p-phi-md">
-        <p className="text-xs font-medium tracking-widest text-sfg uppercase">Notes</p>
+        <p className="text-xs font-medium tracking-widest text-sfg uppercase">备注</p>
         <p className="mt-1 text-sm leading-relaxed">{slide.notes ?? '（无备注）'}</p>
       </div>
     </div>
